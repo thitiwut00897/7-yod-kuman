@@ -10,7 +10,8 @@
 
 > รันในโฟลเดอร์โปรเจกต์ปลายทาง (`cd` เข้าโปรเจกต์ก่อน)  
 > ใช้ `bash -s --` (อย่าใช้ `bash <(curl ...)`)  
-> **ไม่ต้อง clone** repo ไว้เครื่อง — สคริปต์ดาวน์โหลดจาก GitHub (zip หรือ shallow git)
+> **ไม่ต้อง clone** repo ไว้เครื่อง — สคริปต์ดาวน์โหลดจาก GitHub (zip หรือ shallow git)  
+> ต้องมี `git` หรือ `curl`+`unzip` บนเครื่อง
 
 ### `--create` — ติดตั้งใหม่ทั้งหมด + สร้าง docs ใหม่ทั้งหมด
 
@@ -131,6 +132,8 @@ my-cursor-rules/
 | อาการ | วิธีแก้ |
 |-------|---------|
 | `curl: 404` | repo Private → ใส่ `GITHUB_TOKEN` หรือตั้ง repo เป็น Public |
+| `BASH_SOURCE unbound` | อัปเดตสคริปต์ล่าสุดจาก GitHub (รอ 1–2 นาที หรือ pull repo กลางใหม่) |
+| `Downloaded repo missing .cursor` | ใช้สคริปต์ commit ล่าสุด (แก้ log ปน path แล้ว) |
 | ได้ `.cursor` แต่ไม่มี docs | ใช้ `bash -s --` ไม่ใช่ `bash <(curl ...)`; ตรวจว่ามี `node` |
 | ต้องการ docs ใหม่หลังแก้ code | รัน `--create` อีกครั้ง หรือ `node scripts/generate-codebase-docs.mjs . --force` |
 | อัปเดตแพ็กจาก repo กลาง | `bash .../setup-cursor.sh --local --update --project .` |
