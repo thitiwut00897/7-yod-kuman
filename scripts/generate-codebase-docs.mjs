@@ -18,7 +18,6 @@ import { scanProject, formatScanAsMarkdown } from './lib/scan-project.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const scriptsRoot = path.join(__dirname, '..');
-const promptsDir = path.join(__dirname, 'prompts');
 
 const projectPath = path.resolve(process.argv[2] || process.cwd());
 const force = process.argv.includes('--force');
@@ -26,6 +25,7 @@ const force = process.argv.includes('--force');
 const docsRoot = path.join(projectPath, 'docs', 'codebase-docs');
 const templatesDir = path.join(scriptsRoot, 'docs-templates');
 const codebaseDocsTemplates = path.join(templatesDir, 'codebase-docs');
+const promptsDir = path.join(codebaseDocsTemplates, 'prompts');
 
 const TODAY = new Date().toLocaleDateString('th-TH', {
   day: 'numeric',
@@ -188,14 +188,17 @@ function runDocsSetup(scan, scanMd) {
   write('.scan/PROJECT-CONTEXT.md', scanMd);
   write('.scan/scan.json', JSON.stringify(scan, null, 2));
 
-  write('prompts/phase1-copy.txt', readPrompt('phase1-copy.txt'));
-  write('prompts/phase2-copy.txt', readPrompt('phase2-copy.txt'));
   write('HOW-TO-GENERATE-DOCS.md', buildHowTo(scan));
 
   const templateSubdir = path.join(codebaseDocsTemplates, '_template');
   if (exists(templateSubdir)) {
     copyDirRecursive(templateSubdir, path.join(docsRoot, '_template'));
-    console.log('  copy _template/ (HTML แม่แบบ + คู่มือ)');
+    console.log('  copy _template/');
+  }
+
+  if (exists(promptsDir)) {
+    copyDirRecursive(promptsDir, path.join(docsRoot, 'prompts'));
+    console.log('  copy prompts/');
   }
 
   const stylesSrc = path.join(codebaseDocsTemplates, 'styles.css');
@@ -220,17 +223,11 @@ function runDocsSetup(scan, scanMd) {
     console.log('  ข้าม index.html (มี docs HTML อยู่แล้ว)');
   }
 
-  write(
-    'AI-GUIDE.md',
-    `# AI Guide — ${scan.projectName}
-
-อ่าน \`HOW-TO-GENERATE-DOCS.md\` ก่อน — copy prompt จาก \`prompts/\` ไปวางใน Cursor Agent เอง
-
-HTML ต้องตาม \`_template/HTML-TEMPLATE-GUIDE.md\` และ \`page-root.html\` / \`page-feature.html\`
-
-ข้อมูลสแกน: \`.scan/PROJECT-CONTEXT.md\`
-`,
-  );
+  const aiGuideDest = path.join(docsRoot, 'AI-GUIDE.md');
+  const aiGuideSrc = path.join(templatesDir, 'AI-GUIDE.md');
+  if (!exists(aiGuideDest) && exists(aiGuideSrc)) {
+    copyFileEnsureDir(aiGuideSrc, aiGuideDest);
+  }
 
   console.log('');
   console.log('เสร็จ — ขั้นตอนถัดไป (ทำมือ):');

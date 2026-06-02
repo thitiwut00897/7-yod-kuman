@@ -22,7 +22,7 @@
 3. แทนที่ `{{PLACEHOLDER}}` ใน template ด้วยชื่อแอป/โปรเจกต์จริง
 4. เนื้อหาต้องมาจากโค้ดจริง — ไม่เดา
 5. วันที่ใน `last-updated` ใช้วันนี้
-6. อัปเดต project-blueprint.md และ AI-GUIDE.md ให้ตรงโปรเจกต์
+6. อัปเดต project-blueprint.md และ AI-GUIDE.md ให้ตรงโปรเจกต์ (เนื้อหา docs จริง ไม่ใช่ขั้นตอน setup)
 
 ## ไฟล์ที่ต้องมี (ตาม outline)
 

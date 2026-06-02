@@ -135,12 +135,12 @@ your-project/
 
 ```text
 my-cursor-rules/
-├── .cursor/              # แพ็กเต็ม
-├── docs-templates/codebase-docs/
+├── .cursor/
+├── docs-templates/codebase-docs/   # template + prompt (แหล่งเดียวใน repo กลาง)
 │   ├── styles.css
-│   └── _template/
+│   ├── _template/
+│   └── prompts/
 └── scripts/
-    ├── setup-cursor.sh
-    ├── generate-codebase-docs.mjs
-    └── prompts/phase1-copy.txt, phase2-copy.txt
+    ├── setup-cursor.sh           # --create copy ไปโปรเจกต์ปลายทาง
+    └── generate-codebase-docs.mjs
 ```
