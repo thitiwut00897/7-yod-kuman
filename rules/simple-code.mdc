@@ -6,7 +6,7 @@ alwaysApply: true
 # Simple Code — เขียนให้เรียบง่าย ไม่ซับซ้อน
 
 > เป้าหมาย: โค้ดที่ **อ่านแล้วเข้าใจทันที** และ **แก้น้อยที่สุด** สำหรับงานที่ user ขอ  
-> โครงสร้างไฟล์ (Container / hooks / Section) ดู clean-code skill ถ้ามี — `.cursor/skills/` ในโปรเจกต์ หรือ `~/.cursor/skills/clean-code/` (personal) — **แยกไฟล์เมื่อจำเป็น ไม่ใช่เพื่อทำให้ซับซ้อนขึ้น**
+> โครงสร้างไฟล์ (Container / hooks / Section) ดู `.cursor/skills/clean-code.md` — **แยกไฟล์เมื่อจำเป็น ไม่ใช่เพื่อทำให้ซับซ้อนขึ้น**
 
 ---
 

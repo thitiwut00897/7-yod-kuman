@@ -3,7 +3,7 @@ description: SonarQube MCP Server usage guidelines
 globs:
 alwaysApply: true
 ---
-เมื่อ **ต่อ MCP ไม่ได้หรือดึงข้อมูลจาก Sonar ไม่ได้** — ให้ทำตาม rule **sonarqube-mcp-connection** (ห้ามเดาแก้ code; บอก user วิธีตั้งค่า MCP)
+เมื่อ **ต่อ MCP ไม่ได้หรือดึงข้อมูลจาก Sonar ไม่ได้** — ให้ทำตาม `.cursor/rules/sonarqube-mcp-connection.mdc` (ห้ามเดาแก้ code; บอก user วิธีตั้งค่า MCP)
 
 These are some guidelines when using the SonarQube MCP server.
 

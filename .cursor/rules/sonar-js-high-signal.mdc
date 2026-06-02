@@ -1,0 +1,34 @@
+---
+description: High-signal SonarJS-style rules for React Native JavaScript code
+globs: src/**/*.{js,jsx}
+alwaysApply: false
+---
+
+# SonarJS — High-signal rules (JS/JSX)
+
+Use this as the default bar for logic changes in `src/**/*.js` (Sonar “Sonar way” style, without pulling the full rule catalog every time).
+
+## Always do
+
+- **Null safety**: prefer `?.` and `??` defaults; avoid deep access without guards.
+- **Arrays**: never assume `.map/.filter` input is an array — normalize first.
+- **Async**: prefer `try/catch/finally`; never empty `catch {}`.
+- **Readability**: avoid nested ternaries; prefer small helpers + early returns.
+- **Complexity**: if logic branches pile up, extract functions (Sonar cognitive complexity theme).
+- **Hygiene**: remove unused imports/dead code; use `const`/`let` (no `var`).
+- **Security**: if a change touches auth/crypto/injection surfaces, stop and ask PO/security — don’t “guess harden”.
+- **React Native styles**: prefer `StyleSheet.create` objects with **camelCase** keys (`paddingHorizontal`, `marginHorizontal`, `shadowColor`, `shadowOffset`, `shadowOpacity`, `shadowRadius`, `elevation`). Avoid CSS-like kebab keys inside template strings when tooling/TS plugins complain.
+- **React structure**: do not define components inside another component’s body — extract to module scope (or a separate file) and pass data/handlers as props (`javascript:S6478` / `react/no-unstable-nested-components`).
+
+## Prefer not to (unless PO explicitly asks)
+
+- Don’t add `prop-types` just to silence diagnostics. If the team policy is “no prop-types”, fix standards (ESLint/Sonar profile) instead of sprinkling PropTypes.
+
+## Mapping (helpful keywords → typical Sonar keys)
+
+- Cognitive complexity: `javascript:S3776`
+- Nested ternary: `javascript:S3358`
+- Empty catch: `javascript:S2486`
+- Unused import: `javascript:S1128`
+- Optional chaining preference: `javascript:S6582`
+- Props validation noise: `javascript:S6774` (often ESLint `react/prop-types`)

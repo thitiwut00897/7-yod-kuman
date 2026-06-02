@@ -1,8 +1,3 @@
----
-description: รูปแบบสรุปงานยาว — HTML/Markdown ใน docs/work-summary เมื่อเนื้อหาซับซ้อน
-alwaysApply: true
----
-
 # Work Summary Output Format (HTML vs Markdown)
 
 เมื่อ user สั่งให้ **อธิบาย/สรุป** เนื้อหาที่ “ยาว/ซับซ้อน/เข้าใจยาก” หรืออยากได้เอกสารประกอบงาน ให้เลือก format และที่เก็บไฟล์ตามกฎนี้

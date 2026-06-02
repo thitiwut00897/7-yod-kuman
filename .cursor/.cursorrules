@@ -1,0 +1,141 @@
+# Well Life TTIB — Project Blueprint (Agent Compass)
+
+> **ไฟล์นี้สอดคล้องกับ** `docs/codebase-docs/project-blueprint.md` (แก้ที่ใดที่หนึ่งแล้วควร sync อีกไฟล์)
+> **AI Guide:** `docs/codebase-docs/AI-GUIDE.md` — สรุปภาพรวมและแนะนำวิธีหาข้อมูลสำหรับ AI agent
+
+> **อ่านไฟล์นี้ก่อน**เมื่อเริ่ม session ใหม่เพื่อได้ภาพรวมระบบโดยไม่ต้องสแกนทั้ง repo  
+> **รายละเอียดเชิงลึก** (ทุกหน้า, ทุก route, ทุก state): `.cursor/rules/architecture.mdc`  
+> **อัปเดต:** พฤษภาคม 2026
+
+---
+
+## 1. Architecture Overview
+
+| หัวข้อ | รายละเอียด |
+|--------|------------|
+| **แพลตฟอร์ม** | React Native **0.76.x** (iOS + Android) — ไม่ใช่ Next.js / web stack |
+| **UI** | React 18.3, ส่วนใหญ่ **Class / Function components** ใน **JavaScript (`.js`)** — โค้ดแอปหลักไม่ได้ใช้ TypeScript แบบ strict ทั้งโปรเจกต์ |
+| **Navigation** | **@react-navigation** — `NativeStack`, `Stack`, `BottomTabs` นิยามใน `src/routes/` (`RootPage.js`, `pageRoutes.js`, `AuthStackScreen.js`, `TabStackScreen.js`) |
+| **State** | **Redux** (`legacy_createStore`) + **redux-thunk** + **react-redux**; ฟอร์ม legacy: **redux-form**; ฟอร์มใหม่: **react-hook-form** + **yup** / **@hookform/resolvers** |
+| **Styling** | **styled-components** เป็นหลัก (มักรวม style ในไฟล์ component เดียวกัน), บางจุดใช้ `StyleSheet` |
+| **HTTP** | **axios** ผ่าน `src/apiService/apiService.js` — `baseURL` และ token มาจาก `AsyncStorage` + `global.api_url` / `global.api_token` |
+| **i18n** | **i18n-js** + **react-i18next**; ข้อความใน `src/assets/locales/th.js`, `en.js` |
+| **เวลา** | **dayjs** เป็นหลัก (plugins: buddhistEra, utc, timezone, ฯลฯ), timezone แอป: **Asia/Bangkok**; ยังมี **moment** บางจุด |
+| **Observability** | **@sentry/react-native**, **@react-native-firebase/analytics** |
+| **Push** | **@react-native-firebase/messaging**, **@notifee/react-native** |
+| **Pattern หลัก** | **Container = หน้าจอ/ฟีเจอร์** ใต้ `src/containers/`; ดึงข้อมูลผ่าน **Redux actions** ที่เรียก **apiController**; UI นำทางด้วย **ROUTE_PATH** จาก `src/assets` (ดู `architecture.mdc` สำหรับ route ละเอียด) |
+| **Clean architecture เป้าหมาย** (งานใหม่) | **Orchestrator container** + `hooks/` + `Section/` + `constants.js` ตาม `.cursor/skills/clean-code.md` (container `index.js` < 300 บรรทัด, ไฟล์เดียวไม่เกิน 500 บรรทัด) |
+
+**Entry / root:** `index.js` → `src/App.js` (wrap: Sentry → ThemeProvider → Redux `Provider` → SafeArea + GestureHandler → `RootPage`).
+
+---
+
+## 2. Core Directory Structure
+
+| Path | หน้าที่ |
+|------|----------|
+| `src/App.js` | Root: theme, store, global listeners, background / step sync ฯลฯ |
+| `src/routes/` | กำหนด **navigation** ทั้งหมด: `pageRoutes.js` (map screen → component), `RootPage`, stack ย่อย |
+| `src/containers/` | **หน้าจอและฟีเจอร์** ต่อโดเมน (Profile, Mission, Reward, Community, Step, ฯลฯ) — จุดลงทะเบียนหน้าหลัก |
+| `src/components/` | **UI ใช้ซ้ำ** ระดับกลาง (Headers, ปุ่ม, การ์ด, ฯลฯ) |
+| `src/widgets/` | **คอมโพเนนต์ประกอบ** ที่ซับซ้อนกว่า component ทั่วไป (เช่น comment box) |
+| `src/forms/` | คอมโพเนนต์ฟอร์มแยกออกมา |
+| `src/apiService/` | **apiService.js** (axios instance + intercept ผ่าน `getConfig`) + **apiController/** บรices ต่อ domain (`LoginService`, `userService`, `StepService`, …) |
+| `src/store/` | **actions/** (thunk ต่อฟีเจอร์), **reducers/** (รวม `combineReducers` ใน `reducers/index.js`), `actionTypes.js` |
+| `src/helpers/` | ตัวช่วย, บาง hook, format — ดูรายละเอียดต่อไฟล์ |
+| `src/utils/` | i18n wrapper, Sentry, event bus (`eventEmitter`), ฯลฯ |
+| `src/lib/` | native integration ระดับ health, background job ฯลฯ |
+| `src/assets/` | **theme**, **constants / ROUTE_PATH**, fonts, รูป, locales |
+| `android/`, `ios/` | โปรเจกต์ native, flavor / scheme ต่าง dev-uat-prod (ดู `package.json` scripts) |
+| `patches/` | **patch-package** สำหรับแพตช์ dependency |
+
+---
+
+## 3. Data Flow & State
+
+1. **คอนฟิก API**  
+   - อ่าน `api_url` / `api_token` จาก **AsyncStorage** → ตั้ง `global.api_url` / `global.api_token`  
+   - ทุก request ผ่าน `apiService` ใส่ `Authorization: Bearer <token>`
+
+2. **เรียก API จาก UI**  
+   - ลำดับทั่วไป: **Container** → `dispatch` **action** (thunk) หรือเรียก **Service** ใน `apiController` โดยตรง (มรดกโค้ดทั้งสองแบบ)  
+   - Thunk อัปเดต **Redux** ผ่าน `actionTypes` + reducers แยกตามโดเมน (`UserState`, `StepState`, `MissionState`, ฯลฯ)
+
+3. **Global / cross-cutting**  
+   - สถานะเช่น `currentState` (แท็บหลัก, loading screen, modal flags, user inactive, token invalid, …) อยู่ใน reducer กลางใน `store/reducers/index.js`  
+   - Error จาก axios ระดับ global จัดการใน `apiService.js` (เช่น `USER_INACTIVE`, `EMPLOYEE_NOT_FOUND`) และ emit `Event.emit('NEW_AXIOS_ERROR', …)`
+
+4. **Persistence**  
+   - **redux-persist** อยู่ใน dependency แต่ในโค้ดรวม reducer ยังไม่ได้ผูก persist — ข้อมูลถาวรหลักผ่าน **AsyncStorage** + พฤติกรรมแต่ละฟีเจอร์
+
+5. **ไม่มี React Query / RTK** — โฟลว์หลักคือ Redux + axios services
+
+---
+
+## 4. Coding Standards
+
+| หมวด | กฎที่ควรถือ |
+|------|----------------|
+| **ความเรียบง่าย** | **KISS** — เขียนให้ตรงประเด็น ไม่ซับซ้อนเกินจำเป็น; รายละเอียด: **`.cursor/rules/simple-code.mdc`** (always apply) |
+| **ภาษา** | โค้ดแอปเป็น **JS**; ใช้ **prop-types** ที่จำเป็น; อย่าสมมติว่ามี TypeScript strict ทั้ง repo |
+| **Lint** | `eslint` ขยาย `@react-native`; CI/ local: `yarn lint` — ดู `.eslintrc.js` (เช่น `react-native/no-inline-styles`: warn) |
+| **Layout มือถือ** | ออกแบบสำหรับ **มือถือก่อน**; ใช้ `Dimensions`, `react-native-safe-area-context`, และ **RFValue** (`react-native-responsive-fontsize`) สำหรับตัวอักษรที่ต้องสเกล |
+| **ขนาดไฟล์ / โครงสร้าง** | งาน Container ใหม่ปฏิบัติตาม **`.cursor/skills/clean-code.md`**: ไม่เกิน **500 บรรทัด/ไฟล์**, แยก `hooks/`, `Section/`, `constants.js` — แยกเมื่ออ่านยากหรือเกิน limit ไม่ใช่เพื่อ abstraction อย่างเดียว |
+| **API** | ไม่ hardcode base URL ใน feature — ใช้ layer `apiService` + `apiController` |
+| **Patch** | แก้ node_modules ผ่าน **patch-package** แล้ว commit ใต้ `patches/` |
+
+*หมายเหตุ:* หากอนาคตย้ายไป TypeScript แบบ strict ต้องอัปเดต blueprint นี้ — ปัจจุบันยังไม่ใช่กฎของ repo
+
+---
+
+## 5. Naming Conventions
+
+| ประเภท | แนวทางในโปรเจกต์ |
+|--------|-------------------|
+| **หน้าจอ / ฟีเจอร์** | มักลงท้าย **`Container`** (เช่น `LoginContainer`, `HomeContainer`) อยู่ใต้ `src/containers/...` |
+| **Components** | **PascalCase** ชื่อไฟล์สอดคล้องกับ default export (เช่น `Headers.js` → `Headers`) |
+| **API modules** | **PascalCase object** + ชื่อไฟล์สะท้อนโดเมน: `LoginService`, `UserService`, `StepService`, `*Service.js` ใน `apiController/` |
+| **Redux** | แยกโฟลเดอร์ตาม state: `UserActions/`, `StepActions/`, reducer เช่น `UserState`, `StepState` |
+| **ตัวแปร / ฟังก์ชัน** | **camelCase**; constant ที่แชร์มักอยู่ใน `assets/constants` หรือ `constants.js` ในแต่ละ container |
+| **เส้นทาง** | ใช้ **`ROUTE_PATH`** (และคีย์ที่เกี่ยวข้องจาก `src/assets`) แทน magic string เวลา `navigate` |
+
+---
+
+## 6. Key Context / API
+
+### 6.1 เลเยอร์ที่เรียกบ่อย
+
+- **`apiService.js`** — `get`, `post`, `put`, `patch`, `delete`, `post_formdata`; จัดการ token และ error กลาง  
+- **`src/apiService/apiController/`** — จุดรวม endpoint ตามโดเมน (import จาก `apiController/index.js` และไฟล์ย่อย)
+
+### 6.2 Prefix หลักของ REST
+
+- ส่วนใหญ่ใช้ prefix **`/user-api/`** (บางไฟล์ประกอบ path ด้วยตัวแปร `apiPath = '/user-api/'` หรือ `'user-api'`)
+
+### 6.3 ตัวอย่าง endpoint / Service (ไม่ใช่รายการครบทุกเส้น — ดูโค้ดจริงเวลา implement)
+
+| Service / ไฟล์ | ตัวอย่างเส้นทาง / บทบาท |
+|-----------------|-------------------------|
+| `LoginService` | `POST /user-api/login`, `POST /user-api/logout`, OTP: `.../users/me/otps`, `.../otps`, `PUT .../users/me/pin` |
+| `userService` (UserService) | `GET/PATCH /user-api/users/me`, profile, balance, health_factor, cancellations |
+| `StepService` | `PUT /user-api/users/me/steps`, `GET .../users/me/apps` |
+| `MissionService` | `.../users/me/mission_setting`, `.../missions/eyes`, `.../missions/moves` |
+| `TestService` | `POST /user-api/ping` (health check) |
+| `CompanyMissionService`, `CommunityService`, `FriendService`, `BadgeService`, `AppService`, `SpinService`, `SummaryHealthService` | ใช้ `apiPath` `/user-api/` + path ต่อท้ายในแต่ละไฟล์ |
+| อื่นๆ | `healthService`, `rewardService`, `goalService`, `achievementService`, `notificationService`, `contentService` — เปิดไฟล์ตามฟีเจอร์ |
+
+### 6.4 Response / error
+
+- รูปแบบ response มักมี **`success`** และข้อความ error ฝั่ง backend; จัดการ exception ผ่าน **SentryUtil** ใน service หลายจุด  
+- HTTP error ถูกแปลงใน `axiosError` และอาจ sync กับ Redux (`setUserInactive`, `setEmployeeNotFound`, ฯลฯ)
+
+---
+
+## เชื่อมกับเอกสารอื่น
+
+- **รายการหน้าจอ, route, Redux keys, theme tokens แบบเต็ม:** `.cursor/rules/architecture.mdc`  
+- **มาตรฐานแยก container/hook:** `.cursor/skills/clean-code.md`  
+- **เขียน code เรียบง่าย ไม่ซับซ้อน:** `.cursor/rules/simple-code.mdc`  
+- **กฎ Cursor / workflow PO:** `.cursor/rules/po-agent.mdc` และ `.cursor/.cursorrules` (ถ้ามีใน repo)
+
+เมื่อแก้ฟีเจอร์ใหม่ ควรอัปเดต blueprint นี้เฉพาะเมื่อเปลี่ยน stack, โฟลว์ข้อมูล หรือ convention หลักของทีม
