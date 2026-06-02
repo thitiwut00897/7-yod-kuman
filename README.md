@@ -6,6 +6,28 @@
 
 ---
 
+## คำสั่งเดียว (ดึงจาก GitHub แล้วติดตั้งในโปรเจกต์ใหม่)
+
+> แก้ `/path/to/new-project` ให้เป็น path โปรเจกต์ปลายทางของคุณ
+
+### `--create` (ติดตั้งไฟล์ใหม่ทั้งหมด + สร้าง docs ใหม่ทั้งหมด)
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/thitiwut00897/my-cursor-rules/main/scripts/setup-cursor.sh) --repo https://github.com/thitiwut00897/my-cursor-rules.git --project "/path/to/new-project" --overwrite --regenerate-docs
+```
+
+### `--update` (อัปเดต agent/rule/skill อย่างเดียว ไม่ยุ่งกับ docs)
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/thitiwut00897/my-cursor-rules/main/scripts/setup-cursor.sh) --repo https://github.com/thitiwut00897/my-cursor-rules.git --project "/path/to/new-project" --overwrite --skip-docs
+```
+
+หมายเหตุสั้นๆ:
+- `--create` ต้องมี `node` เพื่อ generate `docs/codebase-docs` อัตโนมัติ
+- ทั้งสองคำสั่งจะทับ `.cursor` เดิมในโปรเจกต์ (`--overwrite`)
+
+---
+
 ## โครงสร้าง repo
 
 ```text
