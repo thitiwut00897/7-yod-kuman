@@ -1,35 +1,28 @@
 # my-cursor-rules
 
-แพ็ก Cursor (`rules`, `skills`, `agents`) + สคริปต์ติดตั้งในโปรเจกต์อื่น
+แพ็ก Cursor (`rules`, `skills`, `agents`) + สคริปต์ติดตั้งในโปรเจกต์ React Native / mobile อื่น
 
-**Repo:** https://github.com/thitiwut00897/my-cursor-rules (Public)
+**Repo:** https://github.com/thitiwut00897/my-cursor-rules
 
 ---
 
-## คำสั่งเดียว (copy ใช้ได้เลย)
+## วิธีใช้ (3 ขั้นตอน)
 
-**สำคัญ:** ต้อง `cd` เข้าโปรเจกต์ก่อน และต้องมี `bash -s --` ก่อน `--create` (มิฉะนั้นสคริปต์ไม่ได้รับ arguments)
+### Step 1 — ติดตั้ง `.cursor` + เตรียม docs
+
+เลือกวิธีใดวิธีหนึ่ง:
+
+#### แบบ A: ไม่ต้อง clone (แนะนำ — copy คำสั่งเดียว)
 
 ```bash
 cd /path/to/your-project
 curl -fsSL https://raw.githubusercontent.com/thitiwut00897/my-cursor-rules/main/scripts/setup-cursor.sh | bash -s -- --create --project .
 ```
 
-ถ้าสำเร็จจะเห็นข้อความประมาณ `my-cursor-rules setup`, `[1/4] ... [4/4]`, `✅ เสร็จแล้ว`
+> **สำคัญ:** ต้องมี `bash -s --` ก่อน `--create`  
+> ถ้าสำเร็จจะเห็น `✅ เสร็จแล้ว` และมีโฟลเดอร์ `.cursor/` ในโปรเจกต์
 
-### `--create` — ติดตั้ง `.cursor` + สร้าง `docs/codebase-docs` ใหม่
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/thitiwut00897/my-cursor-rules/main/scripts/setup-cursor.sh | bash -s -- --create --project .
-```
-
-### `--update` — อัปเดต `.cursor` อย่างเดียว (ไม่แตะ docs)
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/thitiwut00897/my-cursor-rules/main/scripts/setup-cursor.sh | bash -s -- --update --project .
-```
-
-### ทางเลือก (clone ครั้งเดียว)
+#### แบบ B: clone repo กลางไว้บนเครื่อง
 
 ```bash
 git clone https://github.com/thitiwut00897/my-cursor-rules.git ~/Github-Work/my-cursor-rules
@@ -37,38 +30,92 @@ cd /path/to/your-project
 bash ~/Github-Work/my-cursor-rules/scripts/setup-cursor.sh --local --create --project .
 ```
 
+#### อัปเดต rules อย่างเดียว (ไม่แตะ docs)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/thitiwut00897/my-cursor-rules/main/scripts/setup-cursor.sh | bash -s -- --update --project .
+```
+
+**ต้องมี:** `git` หรือ `curl`+`unzip`, **Node.js 18+** (สำหรับ `--create`)
+
 ---
 
-## ต้องมีบนเครื่อง
+### Step 2 — สร้าง HTML docs ใน Cursor (copy prompt เอง)
 
-| เครื่องมือ | ใช้เมื่อ |
+สคริปต์ **ไม่รัน AI ให้** — เปิด Cursor Agent แล้ว copy prompt ตามลำดับ:
+
+| ลำดับ | ไฟล์ที่ copy | ทำอะไร |
+|-------|----------------|--------|
+| **2.1** | `docs/codebase-docs/prompts/phase1-copy.txt` | วางในแชท Agent → ได้สารบัญ (outline) |
+| **2.2** | — | บันทึกคำตอบเป็น `docs/codebase-docs/OUTLINE-PHASE1.md` |
+| **2.3** | `docs/codebase-docs/prompts/phase2-copy.txt` | วางในแชท Agent → สร้าง HTML ทุกหน้า |
+
+**วิธี copy**
+
+1. เปิดไฟล์ `.txt` ใน Cursor  
+2. `Cmd+A` → `Cmd+C`  
+3. วางในแชท **Agent** (แนะนำโมเดล Opus) → ส่ง  
+
+Agent จะอ่านจากโปรเจกต์นี้เท่านั้น:
+
+- `docs/codebase-docs/.scan/PROJECT-CONTEXT.md` — ข้อมูลสแกน  
+- `docs/codebase-docs/_template/HTML-TEMPLATE-GUIDE.md` — กฎโครง HTML  
+- `docs/codebase-docs/_template/page-root.html` / `page-feature.html` — แม่แบบ  
+- ไฟล์ `.html` ที่มีอยู่แล้ว (ถ้ามี) — ให้หน้าใหม่เหมือนกัน  
+
+คู่มือเต็ม: `docs/codebase-docs/HOW-TO-GENERATE-DOCS.md`
+
+---
+
+### Step 3 — เสร็จ พร้อมใช้
+
+เมื่อ Phase 2 เสร็จ โปรเจกต์พร้อมใช้งานดังนี้:
+
+| สิ่งที่ได้ | ใช้เมื่อ |
 |-----------|----------|
-| `git` | ดึง config (แนะนำ) |
-| `curl` + `unzip` | สำรองถ้าไม่มี git |
-| `node` | `--create` (generate docs) |
+| `.cursor/rules/`, `skills/`, `agents/` | Cursor อ่าน rules อัตโนมัติ — ตรวจที่ **Settings → Rules** |
+| `docs/codebase-docs/*.html` | เปิด `index.html` ใน browser อ่าน docs ทีม |
+| `docs/codebase-docs/project-blueprint.md` | AI / dev อ่านภาพรวมโปรเจกต์ |
+| `docs/codebase-docs/AI-GUIDE.md` | แนะนำ Agent หาข้อมูลใน repo |
+
+**เช็คว่าพร้อม**
+
+- [ ] Cursor เห็น rules (~12 ไฟล์ใน `.cursor/rules/`)  
+- [ ] เปิด `docs/codebase-docs/index.html` แล้ว sidebar + ลิงก์ครบ  
+- [ ] มี `features/*.html` ตามฟีเจอร์ของโปรเจกต์  
 
 ---
 
-## สคริปต์ทำอะไร
+## สรุป flow
 
-1. ดึง repo `my-cursor-rules` (git clone หรือ zip)
-2. copy `.cursor/` เข้าโปรเจกต์
-3. `--create` → **สแกนโปรเจกต์** + สร้างไฟล์คู่มือ — **ไม่รัน Cursor ให้** user **copy prompt เอง**
+```
+Step 1: setup-cursor.sh --create
+        → .cursor/ + docs/codebase-docs/_template/ + prompts/ + .scan/
 
-### หลัง `--create` (ทำมือใน Cursor)
+Step 2: copy phase1-copy.txt → OUTLINE-PHASE1.md
+        → copy phase2-copy.txt → HTML ครบ
 
-| ไฟล์ | ทำอะไร |
-|------|--------|
-| `HOW-TO-GENERATE-DOCS.md` | คู่มือขั้นตอน + prompt สำรอง |
-| `_template/HTML-TEMPLATE-GUIDE.md` | กฎโครงสร้าง HTML (Agent อ่านก่อนสร้างหน้า) |
-| `_template/page-root.html` | แม่แบบหน้า root |
-| `_template/page-feature.html` | แม่แบบหน้า `features/` |
-| `prompts/phase1-copy.txt` | Copy → Agent → สารบัญ |
-| `prompts/phase2-copy.txt` | Copy → Agent → สร้าง HTML ตาม template |
-| `.scan/PROJECT-CONTEXT.md` | ข้อมูลสแกน |
-| `styles.css` | CSS กลาง (ห้ามเปลี่ยน class หลัก) |
+Step 3: ใช้ Cursor + เปิด docs ใน browser ✅
+```
 
-**Scaffold เก่า** (1 container = 1 html): `node scripts/generate-codebase-docs.mjs . --scaffold --force`
+---
+
+## ไฟล์ที่ `--create` สร้างในโปรเจกต์
+
+```text
+your-project/
+├── .cursor/                    ← rules, skills, agents
+└── docs/
+    └── codebase-docs/
+        ├── HOW-TO-GENERATE-DOCS.md
+        ├── prompts/
+        │   ├── phase1-copy.txt   ← Step 2.1
+        │   └── phase2-copy.txt     ← Step 2.3
+        ├── _template/              ← แม่แบบ HTML
+        ├── .scan/PROJECT-CONTEXT.md
+        ├── styles.css
+        └── index.html              ← placeholder จนกว่า Phase 2 เสร็จ
+```
 
 ---
 
@@ -76,27 +123,24 @@ bash ~/Github-Work/my-cursor-rules/scripts/setup-cursor.sh --local --create --pr
 
 | อาการ | วิธีแก้ |
 |-------|---------|
-| **วางคำสั่งแล้วไม่มีอะไรเกิดขึ้น** | มักลืม `bash -s --` — ใช้ `curl ... \| bash -s -- --create --project .` ไม่ใช่ `\| bash` อย่างเดียว |
-| ขึ้น `ไม่พบ --create` | เหมือนด้านบน — ต้องมี `bash -s --` |
-| ไม่เห็น log | อัปเดตสคริปต์ล่าสุดจาก `main` (log ออกทั้ง stdout) |
-| `Downloaded repo missing .cursor` | ใช้สคริปต์ล่าสุดจาก `main` |
+| ไม่มีอะไรเกิดขึ้นหลัง curl | ใช้ `bash -s -- --create` ไม่ใช่ `\| bash` อย่างเดียว |
+| ขึ้น `ไม่พบ --create` | ลืม `bash -s --` |
+| ไม่มี `HOW-TO` / `prompts/` | ติดตั้ง Node 18+ แล้วรัน `--create` อีกครั้ง |
+| มี `.cursor` แต่ไม่มี HTML | ปกติ — ทำ Step 2 ใน Cursor |
 | `curl 404` | ตรวจว่า repo Public |
-| ไม่มี docs / ไม่มี `HOW-TO-GENERATE-DOCS.md` | ติดตั้ง Node 18+ แล้วรัน `--create` อีกครั้ง |
-| มี `.cursor` แต่ไม่มี HTML ครบ | **ปกติ** — เปิด `HOW-TO-GENERATE-DOCS.md` แล้ว copy `prompts/phase1-copy.txt` ไปวางใน Agent |
 
 ---
 
-## โครงสร้าง repo
+## โครงสร้าง repo กลาง (my-cursor-rules)
 
 ```text
 my-cursor-rules/
-├── .cursor/
-├── docs-templates/
-│   └── codebase-docs/
-│       ├── styles.css
-│       └── _template/   # HTML แม่แบบ + HTML-TEMPLATE-GUIDE.md
+├── .cursor/              # แพ็กเต็ม
+├── docs-templates/codebase-docs/
+│   ├── styles.css
+│   └── _template/
 └── scripts/
     ├── setup-cursor.sh
-    ├── prompts/phase1-copy.txt, phase2-copy.txt
-    └── generate-codebase-docs.mjs
+    ├── generate-codebase-docs.mjs
+    └── prompts/phase1-copy.txt, phase2-copy.txt
 ```
