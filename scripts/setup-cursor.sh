@@ -148,7 +148,7 @@ download_repo_zip() {
     curl_args+=(-H "Authorization: Bearer ${GITHUB_TOKEN}")
   fi
 
-  echo "Downloading ${slug}@${branch} (zip)..."
+  echo "Downloading ${slug}@${branch} (zip)..." >&2
   if ! curl "${curl_args[@]}" -o "$zip_file" "$zip_url"; then
     echo "ERROR: Cannot download zip. If repo is private, set GITHUB_TOKEN." >&2
     echo "  URL tried: $zip_url" >&2
@@ -162,7 +162,7 @@ download_repo_zip() {
 
   unzip -q "$zip_file" -d "$dest"
   local extracted
-  extracted="$(find "$dest" -maxdepth 1 -type d -name '*-main' -o -name '*-master' 2>/dev/null | head -1)"
+  extracted="$(find "$dest" -maxdepth 1 -type d \( -name '*-main' -o -name '*-master' \) 2>/dev/null | head -1)"
   if [[ -z "$extracted" ]]; then
     extracted="$(find "$dest" -maxdepth 1 -mindepth 1 -type d 2>/dev/null | head -1)"
   fi
@@ -180,12 +180,12 @@ fetch_remote_repo() {
   mkdir -p "$dest"
 
   if command -v git >/dev/null 2>&1; then
-    echo "Cloning ${REPO_URL} (depth 1)..."
-    if git clone --depth 1 --branch "$REPO_BRANCH" "$REPO_URL" "$dest/repo" 2>/dev/null; then
+    echo "Cloning ${REPO_URL} (depth 1)..." >&2
+    if git clone --depth 1 --branch "$REPO_BRANCH" "$REPO_URL" "$dest/repo"; then
       echo "$dest/repo"
       return 0
     fi
-    echo "git clone failed, trying zip download..."
+    echo "git clone failed, trying zip download..." >&2
   fi
 
   extracted="$(download_repo_zip "$slug" "$REPO_BRANCH" "$dest")"
@@ -197,7 +197,12 @@ if [[ "$USE_LOCAL" == "1" ]]; then
   echo "Using local config repo: $SOURCE_ROOT"
 else
   TMP_DIR="$(mktemp -d)"
-  SOURCE_ROOT="$(fetch_remote_repo)"
+  SOURCE_ROOT="$(fetch_remote_repo | tail -1)"
+  if [[ ! -d "$SOURCE_ROOT" ]]; then
+    echo "ERROR: Failed to download config repo." >&2
+    exit 2
+  fi
+  echo "Downloaded config to: $SOURCE_ROOT" >&2
 fi
 
 # Build staged .cursor
