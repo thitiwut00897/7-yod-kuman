@@ -158,10 +158,13 @@ touch "$PROJECT/docs/work-summary/.gitkeep"
 if [ -z "$SKIP_DOCS" ]; then
   GEN="$SRC/scripts/generate-codebase-docs.mjs"
   if [ -f "$GEN" ] && command -v node >/dev/null 2>&1; then
-    log "สร้าง docs/codebase-docs ..."
+    log "สแกนโปรเจกต์ + เตรียม AI docs (Cursor Opus) ..."
     NODE_ARGS=("$GEN" "$PROJECT")
     [ -n "$FORCE_DOCS" ] && NODE_ARGS+=("--force")
+    [ -n "${AI_DOCS_OUTLINE:-}" ] && NODE_ARGS+=("--ai-outline")
     node "${NODE_ARGS[@]}"
+    log ""
+    log "ขั้นตอนถัดไป: เปิด docs/codebase-docs/GENERATE-DOCS-PROMPT-PHASE1.md ใน Cursor Agent (Opus)"
   else
     log "WARN: ข้าม generate docs (ไม่มี node หรือ $GEN)"
     mkdir -p "$PROJECT/docs/codebase-docs"
