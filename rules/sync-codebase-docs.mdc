@@ -20,9 +20,7 @@
 
 2. **อัปเดตวันที่** ใน `docs/codebase-docs/index.html` (Last updated: วันที่ทำงานเสร็จ)
 
-3. **ถ้าเพิ่มหน้า HTML หรือ path ใหม่** — อัปเดต `docs/codebase-docs/AI-GUIDE.md` (ตารางแผนที่ค้นหา)
-
-4. **ถ้าเป็นงานเล็ก** ที่ไม่เปลี่ยน structure/behavior (เช่น แก้ typo, ปรับ style เล็กน้อย, fix bug ไม่เปลี่ยน flow) — ไม่ต้องอัปเดต docs
+3. **ถ้าเป็นงานเล็ก** ที่ไม่เปลี่ยน structure/behavior (เช่น แก้ typo, ปรับ style เล็กน้อย, fix bug ไม่เปลี่ยน flow) — ไม่ต้องอัปเดต docs
 
 ## ขั้นตอน
 

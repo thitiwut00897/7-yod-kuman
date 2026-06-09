@@ -88,6 +88,23 @@ const MyScreen = () => {
 };
 ```
 
+### Mistake #2b: Content ด้านล่างถูก Android nav bar โปร่งแสงบัง
+
+```javascript
+// ❌ ปัญหา: spacer ด้านล่าง hardcode 30px
+<View style={{ height: 30 }} />
+
+// ✅ แก้ไข — ใช้ ScrollBottomSpacer (ดู template ครบใน scroll-bottom-safe-area-guide.md)
+import { ScrollBottomSpacer } from '../../components';
+
+<ScrollView>
+  {/* ... */}
+  <ScrollBottomSpacer />
+</ScrollView>
+```
+
+> **Agent:** อ่าน `.cursor/skills/scroll-bottom-safe-area-guide.md` ก่อนสร้าง Section/หน้า scroll ใหม่
+
 ### Mistake #3: Text ล้นออกนอก Container
 
 ```javascript

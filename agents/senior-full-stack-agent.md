@@ -13,12 +13,6 @@ model: claude-4.6-sonnet-medium
 
 ## 0. Core Workflow (บังคับ)
 
-### 0.0 หาข้อมูลในโปรเจกต์ (ก่อน implement)
-
-1. อ่าน `docs/codebase-docs/AI-GUIDE.md` — เลือกหน้า HTML / path โค้ดตามประเภทงาน
-2. อ่าน `.cursor/.cursorrules` + skill ที่เกี่ยวข้อง (`ui-guide`, `logic-guide`, `clean-code`)
-3. ถ้าต้องการ route/screen/reducer ละเอียด → `.cursor/rules/architecture.mdc`
-
 ### 0.1 รับงานจาก PO แบบ “เลือกแล้ว” เท่านั้น
 
 - งานที่เข้ามาต้องเป็น **task ที่ PO เลือก/จัดลำดับแล้ว** (ผ่าน AC + **Test Cases** + task planning แล้ว)

@@ -1,79 +1,1464 @@
 ---
-description: สถาปัตยกรรมโปรเจกต์ปลายทาง — อ่านเมื่อต้องการ routes, หน้าจอ, API, Redux/state หรือก่อนเขียน code ใหม่. อัปเดตหลัง Phase 2 ให้ตรงโครงสร้างจริง
+description: สถาปัตยกรรมโปรเจค Well Life TTIB — อ่านเมื่อต้องการข้อมูลโครงสร้าง, หน้าจอ, component, route, API, Redux state, theme tokens หรือก่อนเริ่มเขียน code ใหม่
 alwaysApply: false
 ---
 
-# Architecture — โปรเจกต์นี้
+# สถาปัตยกรรม Well Life TTIB Mobile App (สำหรับ AI Agent)
 
-> **แพ็กติดตั้ง:** ไฟล์นี้เป็น **placeholder** — Agent ต้อง **เติมจากโค้ดจริง** ใน Phase 2 (พร้อม HTML docs)  
-> **ห้ามอ้างอิง** Well Life / โปรเจกต์อื่น — ใช้เฉพาะข้อมูลใน workspace นี้
-
----
-
-## แหล่งข้อมูล (ลำดับ)
-
-1. `docs/codebase-docs/AI-GUIDE.md` — แผนที่ไปยังหน้า HTML และ path โค้ด
-2. `docs/codebase-docs/architecture.html`, `navigation.html`, `state-management.html`, `api-layer.html`
-3. `docs/codebase-docs/features/*.html` — รายละเอียดต่อฟีเจอร์
-4. โค้ดจริงใต้ `src/` (หรือ path ที่โปรเจกต์ใช้)
+> **วัตถุประสงค์:** ไฟล์นี้สร้างขึ้นเพื่อให้ AI Agent อ่านแทนการ scan project ทุกครั้ง
+> ครอบคลุมทุกหน้าจอ, ทุก component, ทุก route, ทุก API, ทุก Redux state อย่างละเอียด
+>
+> **อัพเดทล่าสุด:** 12 เมษายน 2026
 
 ---
 
-## 1. ข้อมูลทั่วไป
+## 1. ข้อมูลทั่วไปของโปรเจค
 
 | รายการ | ค่า |
-|--------|-----|
-| ชื่อโปรเจกต์ | _(จาก `package.json`)_ |
-| ประเภท | _(เช่น React Native, Next.js, Node API)_ |
-| Entry | _(entry file → root component)_ |
-| ภาษา / package manager | _(จาก repo)_ |
+|---|---|
+| ชื่อโปรเจค | `well-life-ttib-mobile-app` |
+| ประเภท | React Native Mobile App (iOS + Android) |
+| React Native | 0.76.9 |
+| React | 18.3.1 |
+| ภาษา | JavaScript (.js) ทั้งหมด |
+| Package Manager | yarn 3.6.4 |
+| Node | >= 18 |
+| Android Package | `app.invitrace.welllifeapp.ttib` |
+| Entry Point | `index.js` → `src/App.js` |
+| Timezone | Asia/Bangkok |
+| i18n | th (ไทย), en (อังกฤษ) |
 
 ---
 
-## 2. Tech stack
+## 2. Tech Stack ทั้งหมด
 
-_(รายการ dependency หลัก — จาก `package.json` และโค้ดจริง)_
+### Core
+- **React Native** 0.76.9 — UI Framework
+- **React** 18.3.1
+
+### Navigation
+- **@react-navigation/native** 6.1.18
+- **@react-navigation/native-stack** 6.11.0
+- **@react-navigation/bottom-tabs** 6.6.1
+- **@react-navigation/stack** 6.4.1
+
+### State Management
+- **redux** (legacy_createStore) + **redux-thunk** 2.4.2
+- **react-redux** 7.2.9
+- **redux-form** 8.3.10 — ฟอร์มเก่า
+- **react-hook-form** 7.52.1 — ฟอร์มใหม่
+- **redux-persist** 6.0.0 — import แล้วแต่ไม่ได้ใช้จริง
+
+### Styling
+- **styled-components** 5.3.11 — ใช้เป็นหลัก, อยู่ในไฟล์เดียวกัน (ไม่มี styles.js แยก)
+- StyleSheet (ใช้บางที่)
+
+### HTTP Client
+- **axios** 0.21.4 — wrapper อยู่ที่ `src/apiService/apiService.js`
+
+### Date/Time
+- **dayjs** 1.11.12 — ใช้เป็นหลัก (plugins: buddhistEra, utc, timezone, isSameOrBefore, isoWeek)
+- **moment** 2.30.1 — legacy ยังมีใช้บางที่
+
+### i18n
+- **i18n-js** 4.4.3
+- **react-i18next** 11.18.6
+- ไฟล์ภาษา: `src/assets/locales/th.js`, `src/assets/locales/en.js`
+
+### Push Notification
+- **@react-native-firebase/messaging** 20.3.0
+- **@notifee/react-native** 8.0.0
+
+### Analytics & Error Tracking
+- **@react-native-firebase/analytics** 20.3.0
+- **@sentry/react-native** 6.17.0
+
+### Health Data
+- **react-native-health** 1.18.0 — iOS HealthKit
+- **react-native-health-connect** 3.3.3 — Android Health Connect
+
+### Social Login
+- **react-native-fbsdk-next** 13.0.0 — Facebook
+- **@invertase/react-native-apple-authentication** 2.3.0 — Apple
+
+### Animation
+- **react-native-reanimated** 3.18.0
+- **react-native-animatable** 1.4.0
+
+### UI Libraries
+- **@gorhom/bottom-sheet** 5.0.0
+- **react-native-linear-gradient** 2.8.3
+- **react-native-svg** 15.13.0
+- **react-native-chart-kit** 6.12.0
+- **victory-native** 35.5.5
+- **react-native-video** 6.0.0-alpha.11
+- **react-native-webview** 11.26.1
+- **react-native-image-crop-picker** 0.41.2
+- **react-native-biometrics** 3.0.1
+- **react-native-qrcode-svg** 6.3.1
+- **react-native-barcode-builder** 2.0.0
+- **react-native-fast-image** 8.6.3
+- **react-native-modal** 13.0.1
+
+### Background Tasks
+- **react-native-background-fetch** 4.2.8
+
+### Validation
+- **yup** 1.4.0
+- **@hookform/resolvers** 3.9.0
+
+### Other
+- **react-native-responsive-fontsize** 0.5.1 — RFValue สำหรับ responsive fonts
+- **react-native-device-info** 8.7.1
+- **react-native-permissions** 4.1.5
+- **react-native-keep-awake** 4.0.0
+- **react-native-network-logger** 2.0.1
+- **eventemitter3** 4.0.7
+- **query-string** 7.1.3
+- **millify** 4.0.1
 
 ---
 
-## 3. โครงสร้างโฟลเดอร์
+## 3. โครงสร้างไดเรกทอรีหลัก
 
-| Path | หน้าที่ |
-|------|----------|
-| _(เติม)_ | _(containers, components, api, store, routes ฯลฯ)_ |
-
----
-
-## 4. Navigation / Routes
-
-_(ตาราง: route name / constant → screen → container path)_
-
----
-
-## 5. State management
-
-_(store structure, reducers, actions หลัก — หรือระบุว่าไม่ใช้ Redux)_
-
----
-
-## 6. API layer
-
-_(base URL, auth header, service modules ใต้ apiController / services)_
-
----
-
-## 7. Containers / Features
-
-_(รายการ container หรืออ้าง `features/*.html`)_
+```
+well-life-ttib-mobile-app/
+├── android/                    # Android native project
+├── ios/                        # iOS native project
+├── src/                        # ★ โค้ดแอปทั้งหมด (~540 ไฟล์ .js)
+│   ├── App.js                  # Root Component
+│   ├── apiService/             # HTTP Client + API modules
+│   ├── assets/                 # Theme, i18n, constants, fonts, images
+│   ├── components/             # Reusable UI Components
+│   ├── containers/             # หน้าจอ/ฟีเจอร์ทั้งหมด
+│   ├── forms/                  # Form components
+│   ├── helpers/                # Logic, hooks, formatters
+│   ├── lib/                    # Native health integrations + Background jobs
+│   ├── routes/                 # React Navigation structure
+│   ├── store/                  # Redux: actions + reducers
+│   ├── utils/                  # i18n, biometrics, Sentry, event bus
+│   └── widgets/                # Composite widgets
+├── patches/                    # patch-package patches
+├── doc/                        # เอกสารโปรเจค
+├── index.js                    # Entry: AppRegistry + BackgroundFetch
+├── package.json                # Dependencies
+├── babel.config.js             # Babel + reanimated plugin
+├── metro.config.js             # Metro + Sentry wrapper
+└── .cursor/rules/              # Cursor AI rules
+```
 
 ---
 
-## Sync
+## 4. App.js — Root Component
 
-เมื่อเพิ่ม/ลบ container, route, reducer, API module:
+### ลำดับการ wrap:
+```
+Sentry.wrap(App)
+  └── ThemeProvider (styled-components, theme จาก src/assets/theme)
+       └── Provider (Redux store)
+            ├── StatusBar (dark-content, transparent)
+            ├── InitialGlobalStyles
+            ├── BackgroundObserver — จัดการ app lifecycle / background
+            ├── StepSyncManager — sync ข้อมูลก้าวเดิน
+            └── SafeAreaProvider
+                 └── GestureHandlerRootView
+                      ├── RootPage — ★ Navigation ทั้งหมดอยู่ที่นี่
+                      └── NetworkLoggerButton (dev only)
+```
 
-- อัปเดต **ไฟล์นี้**
-- อัปเดต **หน้า HTML** ที่เกี่ยวข้อง + วันที่ใน `index.html`
-- อัปเดต `.cursor/.cursorrules` (ภาพรวม) และ `AI-GUIDE.md` (แผนที่ค้นหา)
+### สิ่งที่ทำใน App.js:
+- Sentry init (DSN hardcoded)
+- dayjs plugins setup: buddhistEra, utc, timezone, isSameOrBefore, isoWeek
+- dayjs timezone = `Asia/Bangkok`
+- Sound preload (`relax.mp3`)
+- AppState listener สำหรับ foreground detection
+- App เป็น Class Component (ไม่ใช่ functional)
 
-ดู `.cursor/rules/sync-codebase-docs.mdc`
+---
+
+## 5. ระบบ Navigation ละเอียด
+
+### ไฟล์ทั้งหมด:
+```
+src/routes/
+├── index.js            # Barrel exports
+├── RootPage.js         # NavigationContainer + Root Stack + Global Modals
+├── AuthStackScreen.js  # Auth flow stack
+├── TabStackScreen.js   # Bottom tab navigator
+└── pageRoutes.js       # กำหนด routes ทั้งหมด: tabRoutes, authRoutes, allRoutes
+```
+
+### โครงสร้าง Navigation:
+```
+NavigationContainer (RootPage.js)
+└── RootStack (Native Stack, initialRoute: /auth)
+     │
+     ├── /auth → AuthStackScreen (Native Stack)
+     │   ├── / → SplashContainer
+     │   ├── /pre-login → PreLoginContainer (มี switchLanguage)
+     │   ├── /login → LoginContainer (มี switchLanguage)
+     │   ├── /verify-account → VerifyAccount
+     │   ├── /form-verify → FormVerify
+     │   ├── /otp-confirm → OTPConfirm
+     │   ├── /set-passwords → SetNewPassword
+     │   ├── /forgot-password → FogotPassword
+     │   ├── /consent → ConsentContainer
+     │   ├── /input-company → InputConpanyContainer
+     │   ├── /authentication → AuthenticationContainer
+     │   └── /start → StartContainer
+     │
+     ├── /main → TabStackScreen (Bottom Tabs, 5 แท็บ)
+     │   ├── /home → HomeContainer (หน้าแรก)
+     │   ├── /news/main → NewsContainer (บทความ)
+     │   ├── /community/index → CommunityMainContainer (โซเชียล)
+     │   ├── /community-notification → CommunityNotificationContainer (แจ้งเตือน, custom icon)
+     │   └── /other-menu → OtherContainer (เมนู)
+     │
+     └── allRoutes (ทุกหน้าอื่นๆ ลงทะเบียนบน root stack)
+          ├── Auth routes ที่ใช้ซ้ำ
+          │   ├── /forgot-password → FogotPassword
+          │   ├── /verify-account → VerifyAccount
+          │   ├── /password-confirm → PasswordConfirm
+          │   ├── /set-passwords → SetNewPassword
+          │   ├── /form-verify → FormVerify
+          │   └── /otp-confirm → OTPConfirm
+          │
+          ├── Reward System (10 routes)
+          │   ├── /reward/index → RewardMainContainer
+          │   ├── /reward/history → RewardHistoryContainer
+          │   ├── /reward/detail → RewardDetailContainer
+          │   ├── /reward/favorite → RewardFavoriteContainer
+          │   ├── /reward/code → RewardCodeContainer
+          │   ├── /reward/categories → RewardCategoriestContainer
+          │   ├── /reward/point-history → PointHistoryContainer
+          │   ├── /reward/reward-history → RewardLuckSpinHistoryContainer
+          │   └── /reward/reward-spining-code → RewardLuckySpinCodeContainer
+          │
+          ├── Profile System (5 routes)
+          │   ├── /profile → ProfileContainer
+          │   ├── /delete-account → DeleteAccountContainer
+          │   ├── /profile-edit → EditProfileContainer
+          │   ├── /alert-mission → MissionProfileContainer
+          │   └── /profile-update → UpdateProfileContainer
+          │
+          ├── News (2 routes)
+          │   ├── /news/main → NewsContainer
+          │   └── /news/detail → NewsDetailContainer
+          │
+          ├── Step System (3 routes)
+          │   ├── /step/main → StepContainer
+          │   ├── /step/suggest → SuggestContainer
+          │   └── /step/alert-message → MessageAlertContainer
+          │
+          ├── Health System (5 routes)
+          │   ├── /health/history → HealthFolderHistoryContainer
+          │   ├── /health/setting → HealthFolderSettingContainer
+          │   ├── /health/suggest → HealthFolderSuggestContainer
+          │   ├── /health/virtual → VirtualHospitalContainer
+          │   └── health-profile → HealthProfileContainer
+          │
+          ├── Health Check (2 routes)
+          │   ├── /health-check → HealthCheckContainer
+          │   └── /health-check/detail → SummaryHealthDetailContainer
+          │
+          ├── Community (8 routes)
+          │   ├── /community/group → CommunityGroupContainer
+          │   ├── /community/group-detail → CommunityGroupDetailContainer
+          │   ├── /community/member → CommunityGroupMemberContainer
+          │   ├── /community/post-detail → CommunityPostDetailContainer
+          │   ├── /community/write-post → CommunityWritePostContainer
+          │   ├── /community/group-setting → CommunityGroupSettingsContainer
+          │   ├── /community/select-group → CommunitySelectGroupContainer
+          │   └── /community/edit-comment → EditCommentContainer
+          │
+          ├── Mission (2 routes)
+          │   ├── /mission/detail → MissionDetailContainer
+          │   └── /mission/setting → MissionSettingContainer
+          │
+          ├── Company Mission (4 routes)
+          │   ├── /company → CompanyMainContainer
+          │   ├── /company/mission/list → CompanyMissionListContainer
+          │   ├── /company/mission/select-team → SelectTeamContainer
+          │   └── /company/mission → CompanyHistoryContainer
+          │
+          ├── Working Health (3 routes)
+          │   ├── /working-health/main → WorkingHealthContainer
+          │   ├── /working-health/suggest → WorkingHealthSuggestContainer
+          │   └── /working-health/history → WorkingHealthHistoryContainer
+          │
+          ├── Office Syndrome (2 routes)
+          │   ├── /office-syndrome/main → OfficeSyndromeContainer
+          │   └── /office-syndrome/suggest → OfficeSyndromeSuggestContainer
+          │
+          ├── Wellbeing (3 routes)
+          │   ├── /wellbeing/main → WellbeingMainContainer
+          │   ├── /wellbeing/question → WellbeingQuestionContainer
+          │   └── /wellbeing/summary → WellbeingSummaryContainer
+          │
+          ├── MSD (3 routes)
+          │   ├── /msd/main → MSDMainContainer
+          │   ├── /msd/select-symptom → MSDSelectSymptomContainer
+          │   └── /msd/question → MSDQuestionContainer
+          │
+          ├── Badge (2 routes)
+          │   ├── badge/main → BadgeMainContainer
+          │   └── badge/detail → BadgeDetailContainer
+          │
+          ├── Friend (2 routes)
+          │   ├── friend-main → FriendMainContainer
+          │   └── friend-request → FriendRequestListContainer
+          │
+          ├── Lucky Spin (2 routes)
+          │   ├── condition → Condition
+          │   └── spinner → Spinner
+          │
+          ├── Sleep (2 routes)
+          │   ├── /sleep/input → SleepInputContainer
+          │   └── /sleep/history → SleepDetailContainer
+          │
+          ├── PIN Code (3 routes)
+          │   ├── /pincode → PinCode
+          │   ├── /forgot-pincode-confirm → UserConfirm
+          │   └── /pincode-reset → PinCodeReset
+          │
+          ├── Settings (2 routes)
+          │   ├── /setting-other → SettingOther
+          │   └── /notification-setting → NotificationSetting
+          │
+          └── Other routes
+               ├── /move → MoveContainer
+               ├── /eye → EyeContainer
+               ├── /notification → NotificationContainer
+               ├── /connect-device → ConnectDevice
+               ├── /connect-device/intro → ConnectDevice
+               ├── /help-connect-device → HelpConnectDevice
+               ├── /earn-point → EarnPointContainer
+               ├── /health-question → HealthQuestionContainer
+               ├── /dangerous → DangerousContainer
+               ├── /withdraw-consent → WithdrawConsentContainer
+               ├── /consent → ConsentContainer
+               └── profile-friend → HealthProfileContainer
+```
+
+### Global Modals ใน RootPage.js (แสดงทับทุกหน้า):
+```
+NavigationContainer
+  ├── ... (Stack Navigator)
+  ├── ForegroundUpdateStepBack      — อัพเดทก้าวเดินเมื่อกลับมา foreground
+  ├── AxiosErrorControl             — จัดการ API errors
+  ├── NotificationControl           — FCM + Notifee handling
+  ├── ErrorTokenInvalid             — Modal Token Invalid
+  ├── NotificationNavigation        — นำทางจาก notification
+  ├── LoaderApp                     — Loading overlay
+  ├── ErrortDuplicateModal          — Modal Duplicate
+  ├── UpdateSecureModal             — Modal Update Secure
+  ├── AccountSuspendedModal         — Modal Account Suspended
+  ├── ExpiredPasswordModal          — Modal Expired Password
+  ├── TimeOutOTP                    — Modal OTP Timeout
+  ├── APIErrorModal                 — Modal API Error
+  ├── ResetPasswordModal            — Modal Reset Password
+  ├── ErrorInactive                 — Modal User Inactive
+  ├── ErrorEmployeeNotFound         — Modal Employee Not Found
+  ├── DataManager                   — จัดการข้อมูลแอป
+  ├── ModalScreen                   — General Modal
+  ├── CommunityNoficationManager    — Community notification alerts
+  ├── Modals.Noted                  — Noted modal
+  └── Modals.Alert                  — Alert modal
+```
+
+---
+
+## 6. ROUTE_PATH — ค่าคงที่ Route ทั้งหมด
+
+ไฟล์: `src/assets/constants/index.js`
+
+```javascript
+ROUTE_PATH = {
+  ROOT: '/',
+  LOGIN: '/login',
+  HOME: '/home',
+  MAIN: '/main',
+  PRE_LOGIN: '/pre-login',
+  CONSENT: '/consent',
+  VERIFYACCOUNT: '/verify-account',
+  FORMVERIFY: '/form-verify',
+  OTP: '/otp-confirm',
+  PASSWORD_CONFIRM: '/password-confirm',
+  SET_PASSWORD: '/set-passwords',
+  FORGOT_PASSWORD: '/forgot-password',
+  SETTING_OTHER: '/setting-other',
+  WITHDRAW_CONSENT: '/withdraw-consent',
+  INPUT_COMPANY: '/input-company',
+  AUTHEN: '/authentication',
+  AUTH: '/auth',
+  START: '/start',
+  OTHER_MENU: '/other-menu',
+  MOVE: '/move',
+  EYE: '/eye',
+  PUSH_UP: '/push-up',
+  SQUAT: '/squat',
+  CONNECT_DEVICE: '/connect-device',
+  HELP_CONNECT_DEVICE: '/help-connect-device',
+  CONNECT_DEVICE_INTRO: '/connect-device/intro',
+  EARN_POINT: '/earn-point',
+  NOTIFICATION_SETTING: '/notification-setting',
+  NOTIFICATION: '/notification',
+  COMMUNITY_NOTIFICATION: '/community-notification',
+
+  MSD: { MAIN, SELECT_SYMPTOM, QUESTION },
+  WELLBEING: { MAIN, QUESTION, SUMMARY },
+  DANGEROUS: '/dangerous',
+  PROFILE: { INDEX, DELETE_ACCOINT, EDIT, ALERT_MISSION, UPDATE, FRIEND },
+  NEWS: { INDEX, MAIN, DETAIL },
+  REWARD: { INDEX, MAIN, DETAIL, CATEGORIES, HISTORY, POINT_HISTORY, REWARD_HISTORY, REWARD_SPINING_CODE, FAVORITE, CODE },
+  STEP: { INDEX, SUGGEST, ALERT_MESSAGE },
+  TARGET_OFFICE_SYNDROME: { INDEX, SUGGEST, ALERT_MESSAGE },
+  HEALTH: { INDEX, MAIN, SUGGEST, HISTORY, VIRTUAL, SETTING },
+  MISSION: { DETAIL, SETTING },
+  WORKING_HEALTH: { INDEX, SUGGEST, HISTORY },
+  HEALTH_QUESTION: '/health-question',
+  COMPANY_MISSION: { INDEX, LIST, SELECT_TEAM, HISTORY, HISTORY_DETAIL },
+  COMMNUNITY: { INDEX, MAIN, GROUP, GROUP_DETAIL, MEMBER, WRITE_POST, POST_DETAIL, GROUP_SETTING, SELECT_GROUP, EDIT_COMMENT },
+  HEALTH_PROFILE: 'health-profile',
+  FRIEND: { FRIEND, MAIN, FRIEND_REQUEST, MY_SENT_REQUEST, FRIEND_OF_FRIEND },
+  BADGE: { MAIN, DETAIL },
+  LUCKY_SPIN: { CONDITION, SPINNER },
+  HEALTH_CHECK: { HEALTH_MAIN, HEALTH_CHECK_DETAIL },
+  SLEEP: { INPUT, HISTORY },
+  PIN_CODE: { PIN_CODE, RESET_PIN_CODE, FORGOT_PIN_CONFIRM },
+}
+```
+
+---
+
+## 7. ระบบ API ละเอียด
+
+### ไฟล์:
+```
+src/apiService/
+├── apiService.js           # ★ Axios wrapper หลัก
+├── index.js                # re-exports apiController
+└── apiController/
+     ├── index.js           # barrel exports
+     ├── AppService.js      # ข้อมูลแอป, app lists
+     ├── LoginService.js    # ล็อกอิน, OTP, รหัสผ่าน
+     ├── userService.js     # ข้อมูลผู้ใช้, โปรไฟล์
+     ├── StepService.js     # ก้าวเดิน, sync steps
+     ├── goalService.js     # เป้าหมาย
+     ├── healthService.js   # ข้อมูลสุขภาพ
+     ├── contentService.js  # บทความ, ข่าว
+     ├── achievementService.js # ความสำเร็จ, เหรียญ
+     ├── rewardService.js   # รางวัล, แลกสิทธิ์
+     ├── notificationService.js # การแจ้งเตือน
+     ├── CommunityService.js # โพสต์, กลุ่ม, ความคิดเห็น
+     ├── FriendService.js   # เพื่อน, คำขอเพื่อน
+     ├── BadgeService.js    # เหรียญตรา
+     ├── SpinService.js     # วงล้อนำโชค
+     ├── MissionService.js  # ภารกิจ
+     ├── CompanyService.js  # บริษัท
+     ├── CompanyMissionService.js # ภารกิจองค์กร
+     ├── SummaryHealthService.js  # สรุปสุขภาพ
+     └── TestService.js     # ทดสอบ
+```
+
+### วิธีทำงานของ apiService.js:
+- **Base URL** จาก `global.api_url` (ตั้งค่าใน `setEnv.js`, เก็บใน AsyncStorage)
+- **Token** จาก `global.api_token` (เก็บใน AsyncStorage)
+- **Methods ที่ export:** `get`, `post`, `put`, `delete`, `patch`, `post_formdata`, `get_base`, `post_base`, `put_base`, `patch_base`
+- **Error Handling:** `axiosError()` → dispatch `setUserInactive` / `setEmployeeNotFound` → emit `NEW_AXIOS_ERROR` ผ่าน EventEmitter
+- ไม่มี Axios interceptors — ใช้ manual error handling
+
+### Environment URLs (จาก setEnv.js):
+| Environment | API URL | Deeplink URL |
+|---|---|---|
+| Dev | `https://well-life-ttib-api-dev.invitrace.app/` | `https://well-life-ttib-dev.invitrace.app/` |
+| Prod | `https://well-life-ttib-api.invitrace.app/` | `https://well-life-ttib.invitrace.app/` |
+
+Default: `__DEV__` → dev, otherwise → prod (เก็บใน AsyncStorage key `env`)
+
+---
+
+## 8. Redux State ละเอียด
+
+### Store Setup:
+- ไฟล์: `src/store/reducers/index.js`
+- ใช้ `legacy_createStore` + `applyMiddleware(thunk)`
+- `CLEAR_STORE` action จะ reset state ทั้งหมด (ใช้ตอน logout)
+
+### State Shape:
+```javascript
+{
+  form,                // redux-form state
+  auth,                // { token, user data จาก login }
+  currentState: {      // ★ สถานะแอปหลัก
+    currentMainTab: 0,        // tab index ปัจจุบัน
+    currentNewsTab: 0,        // news tab index
+    isLogin: false,           // login แล้วหรือยัง
+    isReady: false,           // app พร้อมใช้งาน
+    isActiveStepDevice: false, // เชื่อมต่ออุปกรณ์นับก้าว
+    iTeleOpen: false,         // iTele เปิดอยู่
+    isLoadingScreen: false,   // กำลังโหลด
+    notedModal: null,         // noted modal data
+    alertModal: null,         // alert modal data
+    isInactive: false,        // user inactive
+    isResetPassword: false,   // ต้อง reset password
+    isTimeOutOTP: false,      // OTP timeout
+    isAPIError: false,        // API error
+    isAccountSuspended: false, // บัญชีถูกระงับ
+    timeLock: null,           // เวลาล็อค
+    isUpdateSecureModal: false,
+    typeSecure: null,
+    isDulicateModal: false,   // duplicate data
+    DulicateType: null,
+    isExpiredPassword: false,  // รหัสผ่านหมดอายุ
+    requestUsername: null,
+    isModalEmployeeFound: false,
+    navigateNotification: null, // ข้อมูล navigation จาก notification
+    isTokenInvalid: false,    // token หมดอายุ
+  },
+  userInfo,            // ข้อมูลผู้ใช้ (myUser, myProfile, myHealthFactor, hasPin)
+  myBalance,           // ยอดเหรียญ
+  myAchievement,       // ความสำเร็จ
+  myNotifications,     // การแจ้งเตือน
+  myMission,           // ภารกิจ
+  goalData,            // เป้าหมาย (goalToday, renderGoal)
+  stepDaily,           // ข้อมูลก้าวเดินรายวัน
+  associateEmployee,   // ข้อมูลพนักงาน
+  rewardCategories,    // หมวดหมู่รางวัล
+  rewardState,         // สถานะรางวัล (redemptionList, depositCoins, withdrawCoins, spiningLists)
+  healthData,          // ข้อมูลสุขภาพ (healthLists, healthLatest, healthDetail)
+  communityStore,      // คอมมูนิตี้ (groupList, myGroupList, posts, comments ฯลฯ)
+  badgeStore,          // เหรียญตรา
+  friendStore,         // เพื่อน (friendDetail)
+  healthCheck,         // ผลตรวจสุขภาพ (array)
+  spinState,           // วงล้อ (myCurrentSpin)
+  modalState,          // { notedModal, alertModal }
+  appInfoRedux,        // ข้อมูลแอป
+  myHealthState,       // สุขภาพส่วนตัว
+  modalRedux,          // modal state
+}
+```
+
+### Action Types ทั้งหมด:
+ไฟล์: `src/store/actions/actionTypes.js`
+
+**Auth & App State:**
+- `AUTH`, `CLEAR_STORE`
+- `CURRENT_MAIN_TAB`, `CURRENT_NEWS_TAB`
+- `SET_CURRENT_LOGIN`, `SET_CURRENT_READY`, `SET_ACTIVE_DEVICE`
+- `SET_APP_LISTS`, `SET_MY_HEALTH`
+- `SET_LOADING_SCREEN`, `SET_NAVIGATE_NOTIFICATION`
+- `SET_USER_INACTIVE`, `SET_TOKEN_INVALID`
+- `SET_RESET_PASSWORD`, `SET_TIMEOUT_OTP`, `SET_ERROR_CALL_API`
+- `SET_EXPIRED_PASSWORD`, `SET_UPDATE_SECURE_MODAL`, `SET_TYPE_SECURE`
+- `SET_PASSWORD_BY_USERNAME`, `SET_DUPLICATE_DATA_MODAL`
+- `SET_ACCOUNT_SUSPENDED`, `SET_OPEN_NOTED_MODAL`, `SET_OPEN_ALERT_MODAL`
+- `SET_EMPLOYEE_NOT_FOUND`, `SET_MODAL`, `SET_OPEN_ITELE`
+
+**User:**
+- `SET_MY_USER`, `SET_ASSOCIATE_EMPLOYEE`, `SET_MY_PROFILE`
+- `SET_MY_HEALTH_FACTOR`, `SET_HAS_PIN`
+
+**Balance:** `SET_MY_BALANCE`
+
+**Goal:** `SET_MY_GOAL`, `SET_RENDER_GOAL`
+
+**Step:** `SET_MY_STEP_DAILY`
+
+**Reward:**
+- `SET_REWARD_CATEGORIES`, `SET_REDEMPTION_LIST`
+- `SET_DEPOSIT_COINS`, `SET_WITHDRAW_COINS`, `SET_SPINING_LIST`
+
+**Health:**
+- `SET_HEALTH_LISTS`, `SET_HEALTH_LATEST`, `SET_HEALTH_DETAIL`
+- `SET_HEALTH_CHECK`
+
+**Achievement:** `SET_MY_ACHIEVEMENT`
+
+**Notification:**
+- `SET_MY_NOTIFICATIONS`, `CLOSE_NOTIFICATION_DIALOG`, `OPEN_NOTIFICATION_DIALOG`
+- `SET_OPEN_NOTIFICATION_DWB`
+
+**Mission:** `SET_MY_MISSION_LISTS`
+
+**Community:**
+- `SET_GROUP_LIST`, `SET_MY_GROUP_LIST`, `SET_MEMBER_BY_GROUP`
+- `SET_POST_BY_USER`, `SET_POST_BY_GROUP`, `SET_COMMENT_BY_POST`
+- `FORCE_UPDATE_COMMENT_LIST`, `FORCE_UPDATE_COMMENT_ITEM`, `FORCE_REFRESH_FEED`
+- `SET_POST_DETAIL`, `SET_POST_CONTENT`, `FORCE_UPDATE_DETAIL`
+
+**Badge:** `SET_BADGE`, `SET_FRIEND_BADGE`
+
+**Friend:** `SET_FRIEND_DETAIL`, `UPDATE_FRIEND_DETAIL`
+
+**Community Notification:**
+- `SET_COMMUNITY_NOTIFICATION_LIST`, `UPDATE_NOTIFICATION_ICON_ALERT`, `SET_ALERT_LIST`
+
+**Spin:** `SET_MY_CURRENT_SPIN`
+
+### Actions (Thunks):
+```
+src/store/actions/
+├── index.js              # Sync action creators
+├── actionTypes.js        # String constants
+├── HealthCheckActions.js
+├── AppActions/           # getAppLists
+├── GoalActions/          # getGoalToday
+├── StepActions/          # getStepDaily
+├── UserActions/          # getMyUser, getMyProfile, updateUserMe, updateProfile, associateEmployee, myHealthFactor
+├── BalanceActions/       # getMyBalance
+├── AchievementActions/   # getMyAchievement
+├── RewardActions/        # getDepositCoins, getWithdrawCoins, getSpiningLists, getRewardCategories, getRedemptionList
+├── HealthActions/        # getHealthLists
+├── NotificationActions/  # getMyNotifcations, getCommunityNofications
+├── MissionAction/        # getMyMission, postMiniGames, updateMissionSetting
+├── CommunityActions/
+├── FriendActions/
+├── BadgeActions/
+├── SpinActions/
+└── myHealthActions/
+```
+
+---
+
+## 9. Theme Tokens
+
+ไฟล์: `src/assets/theme/index.js`
+
+### COLORS (ใช้บ่อย):
+| Token | ค่า | ใช้สำหรับ |
+|---|---|---|
+| WHITE_1 | #FFFFFF | พื้นหลังหลัก |
+| BLACK_1 | #2F2F2F | ข้อความหลัก |
+| BLACK_3 | #000000 | ดำสนิท |
+| GREY_1 | #F4F4F4 | พื้นหลังเทาอ่อน |
+| GREY_2 | #A0A0A0 | ข้อความรอง |
+| GREEN | #12A59E | สีหลักของแอป (primary) |
+| GREEN_4 | #218E89 | สีเขียวเข้ม |
+| RED | #F0211D | สีแดง/error |
+| BLUE_4 | #0B3778 | สีน้ำเงินเข้ม |
+| VIOLET_1 | #3F3F8A | ม่วง |
+| YELLOW | #FDC709 | เหลือง |
+| ORANGE_1 | #FF7200 | ส้ม |
+| PRIMARY_BG | #F4F6FF | พื้นหลัง primary |
+| DISABLED | #E6E6E6 | disabled state |
+| OVERLAY | rgba(0,0,0,0.3) | overlay |
+
+### FONT_SIZE:
+ใช้ `RFValue()` สำหรับ responsive font sizes:
+- SIZE_7 ถึง SIZE_36 (7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 24, 26, 30, 36)
+
+### FONT_FAMILY:
+| Weight | TH / EN |
+|---|---|
+| THIN | Kanit-Thin |
+| LIGHT | Kanit-Light |
+| REGULAR | Kanit-Regular |
+| MEDIUM | Kanit-Medium |
+| SEMIBOLD | Kanit-SemiBold |
+| BOLD | Kanit-Bold |
+
+### SCREEN:
+- `WIDTH` — หน้าจอกว้าง (Dimensions)
+- `HEIGHT` — หน้าจอสูง
+- `DEVICE_HEIGHT` — สูงรวม StatusBar (Android)
+
+---
+
+## 10. Components ทั้งหมด
+
+ไฟล์: `src/components/index.js`  
+รูปแบบ: แต่ละ component เป็นโฟลเดอร์ที่มี `index.js`
+
+### Layout & Background:
+- `BackgroundCloudVector` — พื้นหลังเมฆ vector
+- `BackgroundImage` — พื้นหลังรูปภาพ
+- `BgLinearGradient` — พื้นหลัง gradient
+- `BoxContainer` — container กล่อง
+- `Flexbox` — flexbox wrapper
+
+### Navigation & Headers:
+- `BackButton` — ปุ่มกลับ
+- `AndroidBack` — ปุ่มกลับ Android
+- `HeaderTitle` — หัวข้อ header
+- `Headers` — header component หลัก
+- `HeadersWithBg` — header พร้อมพื้นหลัง
+
+### Buttons & Inputs:
+- `ButtonApp` — ปุ่มหลัก (ใช้บ่อยที่สุด)
+- `ButtonCustom` — ปุ่ม custom
+- `TextInputs` — text input หลัก
+- `TextInputBorderBottom` — text input เส้นล่าง
+- `DateInput` — เลือกวันที่
+- `DateTimePickerInput` — เลือกวัน+เวลา
+- `TimeInput` — เลือกเวลา
+- `Picker` — dropdown picker
+- `DropdownHealthCheck` — dropdown สำหรับ health check
+- `InputTextCommentMentions` — input mention ใน comment
+- `InputTextPost` — input เขียนโพสต์
+
+### Cards:
+- `Cards/` — sub-components: CardCommentLoading, CardCommunityNotification, CardEarnPoint, CardEarnReward, CardGroup, CardGroupLoading, CardLevel, CardPostLoading, CardRewardLoading, CardSpinner, CardUsePoint, CardUserLoading
+- `CardAppointmentHistory` — card ประวัตินัดหมาย
+- `CardNews` — card ข่าว
+- `CardNotification` — card แจ้งเตือน
+- `CardRecommenderInfo` — card แนะนำ
+- `CardReward` — card รางวัล
+- `CardSleepValue` — card ค่าการนอน
+- `CardUserInfo` — card ข้อมูลผู้ใช้
+- `HistoryHealthCard` — card ประวัติสุขภาพ
+
+### Charts & Progress:
+- `ChartHealth` — กราฟสุขภาพ
+- `ChartRing` — กราฟวงกลม
+- `ChartSVG` — กราฟ SVG
+- `ProgessRing` — progress วงกลม
+- `ProgressBar` — progress bar
+- `ProgressBarBg` — progress bar พร้อมพื้นหลัง
+- `Score` — แสดงคะแนน
+- `Exp` — แสดง EXP
+- `BoxLevel` — แสดงระดับ
+
+### Modals & Dialogs:
+- `Modal` — modal หลัก
+- `ModalScreen` — modal เต็มจอ
+- `DialogPopup` — dialog popup (ใช้บ่อย)
+- `CongrateDialog` — dialog ยินดีด้วย
+- `Modals/` — sub-components:
+  - `APIErrorModal`, `AccountSuspendedModal`, `Alert`, `ConfirmPhoneNumber`
+  - `ErrortDuplicateModal`, `ErrorEmployeeNotFound`, `ErrorInactive`
+  - `ErrorTokenInvalid`, `ExpiredPasswordModal`, `Noted`
+  - `ResetPasswordModal`, `TimeOutOTP`, `UpdateSecureModal`
+
+### Display & Status:
+- `Displays/` — AlertFailed, Box, ConnectApplication, SetupHCDataSource
+- `Avatar` — รูป avatar
+- `AvatarRanking` — avatar สำหรับ ranking
+- `IconImage` — รูป icon
+- `ImageZoom` — รูปขยาย
+- `StepStatus` — สถานะก้าวเดิน
+- `Dot` — จุด
+- `Skeleton` — loading skeleton
+- `ListEmpty` — รายการว่าง
+- `AppInfo` — ข้อมูลแอป
+- `HowtoInfo` — วิธีใช้
+
+### Lists & Scrolling:
+- `FlatListDebounceOnEndReached` — FlatList พร้อม debounce
+- `FlatListFriendLayoutAnimate` — FlatList animate สำหรับเพื่อน
+- `ScrollToRefresh` — pull to refresh
+- `BottomSheetList` — bottom sheet list
+
+### Tab & View:
+- `TabViewCustom` — custom tab view
+- `TabHealthCheck` — tab สำหรับ health check
+
+### User Components:
+- `Users/` — UserFriendItem, UserFriendRequestItem, UserMemberItem
+
+### Other:
+- `BoxCoinContent` — กล่องเหรียญ
+- `BoxMissionHealth` — กล่องภารกิจสุขภาพ
+- `BoxOrgans` — กล่องอวัยวะ
+- `BoxReportHealth` — กล่องรายงานสุขภาพ
+- `CountDown` — นับถอยหลัง
+- `CountdownMission` — นับถอยหลังภารกิจ
+- `WeeklyBox` — กล่องรายสัปดาห์
+- `LoaderApp` — loading overlay ทั้งแอป
+- `NotificationAlertIcon` — icon แจ้งเตือน (มี badge)
+- `Upload` — อัพโหลดไฟล์
+- `Typography` — ข้อความ styled
+- `Typology` — ข้อความ styled (variant)
+- `WheelFrame` — กรอบวงล้อ
+- `InitialGlobalStyles` — global styles
+- `NetworkLoggerButton` — ปุ่ม network logger (dev only)
+
+---
+
+## 11. Widgets ทั้งหมด
+
+ไฟล์: `src/widgets/index.js`  
+Composite components ที่ประกอบจากหลาย components
+
+### Community / Social:
+- `BoxPost/` — header, content, image, video, like/comment, report, options
+- `BoxComment/` — forms, options, edit (+ EditCommentContainer)
+- `BoxWritePost` — กล่องเขียนโพสต์
+- `MiniUserLists` — รายชื่อผู้ใช้ขนาดเล็ก
+
+### Health & Fitness:
+- `HealthCheckCard` — card ผลตรวจสุขภาพ
+- `HealthMissionHeader` — header ภารกิจสุขภาพ
+- `HealthyChallengeWidgets` — widgets ชาเลนจ์สุขภาพ
+- `BmiCard` — card BMI
+
+### Reward:
+- `RewardWidgets` — widgets รางวัล
+
+### Badge:
+- `Badge/` — BadgeItem, BadgeList, TrophyPoint
+
+### Friend:
+- `Friend/` — friend widgets
+
+### Input Widgets:
+- `ChoiceColumn` — เลือกแบบคอลัมน์
+- `ChoiceRow` — เลือกแบบแถว
+- `ChoiceRowExplainColumn` — เลือก+อธิบายแบบคอลัมน์
+- `ChoiceRowExplainText` — เลือก+อธิบายข้อความ
+- `DurationInput` — input ระยะเวลา
+- `DurationTab` — tab ระยะเวลา
+- `InputNumberOfDays` — input จำนวนวัน
+- `DateTabAnnual` — tab วันที่ประจำปี
+
+### Notification:
+- `NotificationCarousel` — carousel แจ้งเตือน
+- `NotificationLists` — รายการแจ้งเตือน
+- `NotificationDwbDialog` — dialog แจ้งเตือน DWB
+- `NotificationStepDialog` — dialog แจ้งเตือนก้าวเดิน
+
+### Other:
+- `CompanyMissionCard` — card ภารกิจองค์กร
+- `ModalPickerCompany` — modal เลือกบริษัท
+- `SwitchLanguage` — สลับภาษา
+- `PopUpSuccess` — popup สำเร็จ
+- `IteleWebView` — WebView สำหรับ iTele
+- `VideoFullScreen` — video เต็มจอ
+
+---
+
+## 12. Containers (หน้าจอ) ทั้งหมด — ละเอียด
+
+### Authentication & Company:
+| Path | Container | คำอธิบาย |
+|---|---|---|
+| `LoginContainer/` | LoginContainer | หน้าล็อกอิน |
+| `LoginContainer/AppleLoginButton/` | AppleLoginButton | ปุ่มล็อกอิน Apple |
+| `LoginContainer/FogotPassword/` | FogotPassword | ลืมรหัสผ่าน |
+| `LoginContainer/FormVerify/` | FormVerify | ฟอร์มยืนยัน |
+| `LoginContainer/OTPConfirm/` | OTPConfirm | ยืนยัน OTP |
+| `LoginContainer/PasswordConfirm/` | PasswordConfirm | ยืนยันรหัสผ่าน |
+| `LoginContainer/SetNewPassword/` | SetNewPassword | ตั้งรหัสผ่านใหม่ |
+| `LoginContainer/VerifyAccount/` | VerifyAccount | ยืนยันบัญชี |
+| `PreLoginContainer/` | PreLoginContainer | หน้าก่อนล็อกอิน |
+| `SplashContainer/` | SplashContainer | Splash screen |
+| `ConsentContainer/` | ConsentContainer | ยินยอมเงื่อนไข |
+| `WithdrawConsentContainer/` | WithdrawConsentContainer | ถอนความยินยอม |
+| `CompanyContainer/InputConpanyContainer/` | InputConpanyContainer | กรอกข้อมูลบริษัท |
+| `CompanyContainer/AuthenticationContainer/` | AuthenticationContainer | ยืนยันตัวตนบริษัท |
+| `CompanyContainer/StartContainer/` | StartContainer | เริ่มต้นบริษัท |
+| `PinCode/` | PinCode | ระบบ PIN |
+| `PinCode/UserConfirm/` | UserConfirm | ยืนยันตัวตนผู้ใช้ |
+
+### Main & System:
+| Path | Container | คำอธิบาย |
+|---|---|---|
+| `HomeContainer/` | HomeContainer | ★ หน้าหลัก |
+| `BackgroundObserver/` | BackgroundObserver | จัดการ app lifecycle |
+| `Manager/DataManager.js` | DataManager | จัดการข้อมูลแอป |
+| `Manager/StepSyncManager.js` | StepSyncManager | sync ก้าวเดิน |
+
+### Profile System:
+| Path | Container | คำอธิบาย |
+|---|---|---|
+| `ProfileSystem/ProfileContainer/` | ProfileContainer | หน้าโปรไฟล์หลัก |
+| `ProfileSystem/ProfileContainer/Section/ProfileCard.js` | ProfileCard | card โปรไฟล์ |
+| `ProfileSystem/ProfileContainer/Section/ProfileDetail.js` | ProfileDetail | รายละเอียดโปรไฟล์ |
+| `ProfileSystem/EditProfileContainer/` | EditProfileContainer | แก้ไขโปรไฟล์ |
+| `ProfileSystem/UpdateProfileContainer/` | UpdateProfileContainer | อัพเดทโปรไฟล์ |
+| `ProfileSystem/DeleteAccountContainer/` | DeleteAccountContainer | ลบบัญชี |
+| `ProfileSystem/MissionProfileContainer/` | MissionProfileContainer | ภารกิจโปรไฟล์ |
+
+### Health Systems:
+| Path | Container | คำอธิบาย |
+|---|---|---|
+| `HealthFolderSystem/HealthFolderMainContainer/` | HealthFolderMainContainer | แฟ้มสุขภาพหลัก |
+| `HealthFolderSystem/HealthFolderHistoryContainer/` | HealthFolderHistoryContainer | ประวัติสุขภาพ |
+| `HealthFolderSystem/HealthFolderSettingContainer/` | HealthFolderSettingContainer | ตั้งค่าสุขภาพ |
+| `HealthFolderSystem/SuggestContainer/` | HealthFolderSuggestContainer | แนะนำสุขภาพ |
+| `HealthFolderSystem/VirtualHospitalContainer/` | VirtualHospitalContainer | โรงพยาบาลเสมือน |
+| `HealthCheckContainer/` | HealthCheckContainer | ผลตรวจสุขภาพ |
+| `HealthCheckContainer/SummaryHealthContainer/` | SummaryHealthContainer | สรุปผลตรวจ |
+| `HealthCheckContainer/SummaryHealthDetailContainer/` | SummaryHealthDetailContainer | รายละเอียดผลตรวจ (16 เกณฑ์) |
+| `HealthProfileContainer/` | HealthProfileContainer | โปรไฟล์สุขภาพ |
+| `HealthQuestionContainer/` | HealthQuestionContainer | แบบสอบถามสุขภาพ |
+| `HealthQuestionContainer/MSDContainerSystem/MSDMainContainer/` | MSDMainContainer | MSD หน้าหลัก |
+| `HealthQuestionContainer/MSDContainerSystem/MSDQuestionContainer/` | MSDQuestionContainer | MSD คำถาม |
+| `HealthQuestionContainer/MSDContainerSystem/MSDSelectSymptomContainer/` | MSDSelectSymptomContainer | MSD เลือกอาการ |
+| `HealthQuestionContainer/WellbeingSystem/WellbeingMainContainer/` | WellbeingMainContainer | Wellbeing หน้าหลัก |
+| `HealthQuestionContainer/WellbeingSystem/WellbeingQuestionContainer/` | WellbeingQuestionContainer | Wellbeing คำถาม |
+| `HealthQuestionContainer/WellbeingSystem/WellbeingSummaryContainer/` | WellbeingSummaryContainer | Wellbeing สรุป |
+
+### Step & Activity:
+| Path | Container | คำอธิบาย |
+|---|---|---|
+| `StepSystem/StepContainer/` | StepContainer | หน้าหลักก้าวเดิน |
+| `StepSystem/SuggestContainer/` | SuggestContainer | แนะนำก้าวเดิน |
+| `StepSystem/MessageAlertContainer/` | MessageAlertContainer | แจ้งเตือนก้าว |
+| `ConnectDeviceContainer/` | ConnectDevice | เชื่อมต่ออุปกรณ์ |
+| `HelpConnectDevice/` | HelpConnectDevice | ช่วยเหลือเชื่อมต่อ |
+| `SleepContainer/SleepInputContainer/` | SleepInputContainer | บันทึกการนอน |
+| `SleepContainer/SleepDetailContainer/` | SleepDetailContainer | รายละเอียดการนอน |
+| `MoveContainer/` | MoveContainer | กิจกรรมเคลื่อนไหว |
+| `EyeContainer/` | EyeContainer | กิจกรรมสายตา |
+| `PushUpContainer/` | PushUpContainer | กิจกรรมวิดพื้น |
+
+### Working Health:
+| Path | Container | คำอธิบาย |
+|---|---|---|
+| `WorkingHealthSystem/WorkingHealthContainer/` | WorkingHealthContainer | สุขภาพการทำงาน |
+| `WorkingHealthSystem/WorkingHealthHistoryContainer/` | WorkingHealthHistoryContainer | ประวัติ |
+| `WorkingHealthSystem/WorkingHealthSuggestContainer/` | WorkingHealthSuggestContainer | คำแนะนำ |
+| `OfficeSyndromeSystem/OfficeSyndromeContainer/` | OfficeSyndromeContainer | ออฟฟิศซินโดรม |
+| `OfficeSyndromeSystem/OfficeSyndromeSuggestContainer/` | OfficeSyndromeSuggestContainer | คำแนะนำ |
+| `DangerousContainer/` | DangerousContainer | อันตราย (3 sub-containers) |
+
+### Reward System:
+| Path | Container | คำอธิบาย |
+|---|---|---|
+| `RewardSystem/RewardMainContainer/` | RewardMainContainer | หน้าหลักรางวัล |
+| `RewardSystem/RewardContainer/` | RewardContainer | รางวัล |
+| `RewardSystem/RewardCategoriestContainer/` | RewardCategoriestContainer | หมวดหมู่ |
+| `RewardSystem/RewardDetailContainer/` | RewardDetailContainer | รายละเอียดรางวัล |
+| `RewardSystem/RewardCodeContainer/` | RewardCodeContainer | โค้ดรางวัล |
+| `RewardSystem/RewardHistoryContainer/` | RewardHistoryContainer | ประวัติ |
+| `RewardSystem/RewardFavoriteContainer/` | RewardFavoriteContainer | รายการโปรด |
+| `RewardSystem/RewardLuckySpinCodeContainer/` | RewardLuckySpinCodeContainer | โค้ดวงล้อ |
+| `LuckySpin/` | Condition, Spinner | วงล้อนำโชค |
+| `EarnPointContainer/` | EarnPointContainer | ได้รับคะแนน |
+| `PointHistoryContainer/` | PointHistoryContainer | ประวัติคะแนน |
+| `RewardLuckSpinHistoryContainer/` | RewardLuckSpinHistoryContainer | ประวัติวงล้อ |
+
+### Mission System:
+| Path | Container | คำอธิบาย |
+|---|---|---|
+| `MissionSystem/MissionDetailContainer/` | MissionDetailContainer | รายละเอียดภารกิจ |
+| `MissionSystem/MissionSettingContainer/` | MissionSettingContainer | ตั้งค่าภารกิจ |
+| `CompanyMissionContainer/MainContainer/` | CompanyMainContainer | ภารกิจองค์กรหลัก |
+| `CompanyMissionContainer/ListContainer/` | CompanyMissionListContainer | รายการภารกิจองค์กร |
+| `CompanyMissionContainer/SelectTeamContainer/` | SelectTeamContainer | เลือกทีมแข่งขัน |
+| `CompanyMissionContainer/LeaderBoardContainer/` | LeaderBoardContainer | Leaderboard ภารกิจองค์กร |
+| `CompanyMissionContainer/HistoryContainer/` | CompanyHistoryContainer | ประวัติภารกิจองค์กร |
+| `CompanyMissionContainer/HistoryDetailContainer/` | HistoryDetailContainer | รายละเอียดประวัติ |
+
+### Community System:
+| Path | Container | คำอธิบาย |
+|---|---|---|
+| `CommunityContainer/CommunityMainContainer/` | CommunityMainContainer | หน้าหลัก feed |
+| `CommunityContainer/CommunityGroupContainer/` | CommunityGroupContainer | กลุ่ม |
+| `CommunityContainer/CommunityGroupDetailContainer/` | CommunityGroupDetailContainer | รายละเอียดกลุ่ม |
+| `CommunityContainer/CommunityGroupMemberContainer/` | CommunityGroupMemberContainer | สมาชิกกลุ่ม |
+| `CommunityContainer/CommunityGroupSettingsContainer/` | CommunityGroupSettingsContainer | ตั้งค่ากลุ่ม |
+| `CommunityContainer/CommunityPostDetailContainer/` | CommunityPostDetailContainer | รายละเอียดโพสต์ |
+| `CommunityContainer/CommunitySelectGroupContainer/` | CommunitySelectGroupContainer | เลือกกลุ่ม |
+| `CommunityContainer/CommunityWritePostContainer/` | CommunityWritePostContainer | เขียนโพสต์ |
+| `CommunityNotificationContainer/` | CommunityNotificationContainer | แจ้งเตือนคอมมูนิตี้ |
+
+### Other:
+| Path | Container | คำอธิบาย |
+|---|---|---|
+| `NewsSystem/NewsContainer/` | NewsContainer | ข่าว |
+| `NewsSystem/NewsDetailContainer/` | NewsDetailContainer | รายละเอียดข่าว |
+| `BadgeContainer/BadgeMainContainer/` | BadgeMainContainer | เหรียญตราหลัก |
+| `BadgeContainer/BadgeDetailContainer/` | BadgeDetailContainer | รายละเอียดเหรียญ |
+| `FriendContainer/FriendMainContainer/` | FriendMainContainer | เพื่อนหลัก |
+| `FriendContainer/FriendRequestListContainer/` | FriendRequestListContainer | คำขอเพื่อน |
+| `OtherContainer/` | OtherContainer | เมนูอื่นๆ |
+| `SettingOther/` | SettingOther | ตั้งค่าอื่นๆ |
+| `SettingOther/NotificationSetting/` | NotificationSetting | ตั้งค่าแจ้งเตือน |
+| `SettingOther/PinCodeReset/` | PinCodeReset | รีเซ็ต PIN |
+| `NotificationContainer/` | NotificationContainer | แจ้งเตือน |
+| `WaitingContainer/` | WaitingContainer | หน้ารอ |
+
+---
+
+## 13. Helpers ละเอียด
+
+```
+src/helpers/
+├── index.js                    # Barrel exports
+├── analytics/                  # Firebase Analytics (screenView, event)
+├── Emitter/                    # EventEmitter3 singleton ★ instance ที่ 2
+│
+├── controls/                   # Invisible React controllers (ใช้ useEffect + listeners)
+│   ├── NotificationControl/    # FCM + Notifee foreground/background
+│   ├── AxiosErrorControl/      # API errors (401, TOKEN_INVALID)
+│   ├── ForegroundUpdateStepBack/ # อัพเดทก้าวเมื่อกลับมา foreground
+│   └── NotificationNavigation/ # นำทางจาก notification (รอ PIN flow)
+│
+├── formatter/
+│   ├── calc_range_code/        # คำนวณช่วงค่า
+│   ├── date_time/              # format วัน/เวลา
+│   ├── number/                 # format ตัวเลข
+│   └── stepDataGraph/          # เตรียมข้อมูลกราฟก้าว
+│
+├── functions/
+│   ├── index.js                # exports: calcPendingTime, handleDeviceConnect
+│   ├── safeNumberParser.js     # safeParseFloat, isValidNumber, formatNumberWithCommas
+│   ├── setEnv.js               # ★ ตั้งค่า environment (dev/prod) + global variables
+│   ├── getFcmToken.js          # ดึง FCM token
+│   ├── handleDeviceConnect.js  # จัดการเชื่อมต่ออุปกรณ์
+│   ├── calcPendingTime.js      # คำนวณเวลาที่เหลือ
+│   ├── replaceTagsHtml.js      # แทนที่ HTML tags
+│   ├── removeObjectWithId.js   # filter array
+│   ├── parseQueryString.js     # parse query string
+│   ├── getPostType.js          # mapping ประเภทโพสต์
+│   ├── getInsetsTop.js         # safe area inset
+│   ├── getImageSize.js         # ขนาดรูปภาพ
+│   ├── getFileName.js          # ชื่อไฟล์
+│   ├── getDeviceCode.js        # รหัสอุปกรณ์
+│   ├── convertToPercent.js     # แปลงเป็นเปอร์เซ็นต์
+│   └── addCommas.js            # ใส่ comma ในตัวเลข
+│
+├── generate/
+│   ├── stepFormat.js           # normalize ข้อมูลก้าว (Apple/Google)
+│   └── appTypes.js             # เพิ่ม labels, device flags
+│
+├── healthCheck/
+│   ├── renderHealthCheck.js    # map ประเภทผลตรวจ → levels/labels
+│   ├── setSleepChart.js        # เตรียมข้อมูลกราฟการนอน
+│   ├── healthPosition.js       # positioning helpers
+│   └── formatPositionSVG.js    # SVG positioning
+│
+├── hooks/
+│   ├── index.js
+│   ├── useAuthenRoute.js       # auth routing logic
+│   ├── useNotification.js      # ★ FCM/Notifee + navigation จาก notification
+│   ├── withNavigation.js       # HOC inject navigation
+│   ├── usePrevious.js          # previous value hook
+│   └── HocHookWrapper.js       # HOC wrapper
+│
+└── managers/
+     ├── index.js
+     └── CommunityNoficationManager.js  # community notification alerts
+```
+
+---
+
+## 14. Lib — Native Integrations
+
+```
+src/lib/
+├── HealthData/
+│   ├── HealthKit/              # iOS Apple Health
+│   │   ├── index.js
+│   │   ├── permissions.js
+│   │   ├── stepCount.js
+│   │   └── options.js
+│   └── HealthConnect/          # Android Health Connect
+│       ├── index.js
+│       ├── permissions.js
+│       ├── stepCount.js
+│       └── options.js
+│
+└── Job/                        # Background jobs
+     ├── syncStepApp.js         # sync ก้าวจากแอป
+     ├── uploadStep2.js         # อัพโหลดก้าว
+     ├── uploadHealthData.js    # อัพโหลดข้อมูลสุขภาพ
+     ├── syncHealthApp.js       # sync ข้อมูลสุขภาพ
+     ├── syncStepFromLatest.js  # sync ก้าวล่าสุด
+     ├── postHealthDataSync.js  # post sync
+     ├── checkDevice.js         # ตรวจสอบอุปกรณ์
+     └── checkConnectDevice.js  # ตรวจสอบการเชื่อมต่อ
+```
+
+---
+
+## 15. Forms
+
+```
+src/forms/
+├── index.js
+├── AaplatForm/           # ฟอร์ม platform
+├── CholesterolForm/      # ฟอร์มคอเลสเตอรอล
+├── HealthInputForm/      # ฟอร์มกรอกข้อมูลสุขภาพ
+├── InputCompanyForm/     # ฟอร์มบริษัท
+├── LoginForm/            # ฟอร์มล็อกอิน
+├── MSDQuestionForm/      # ฟอร์มแบบสอบถาม MSD
+├── ProfileInputForm/     # ฟอร์มโปรไฟล์
+├── TravelInputForm/      # ฟอร์มการเดินทาง
+├── WorkInputForm/        # ฟอร์มการทำงาน
+└── WorkTypeForm/         # ฟอร์มประเภทงาน
+```
+
+---
+
+## 16. Utils
+
+```
+src/utils/
+├── i18n.js               # ตั้งค่า i18n
+├── eventEmitter.js       # ★ EventEmitter3 instance ที่ 1 (ใช้โดย API + controls)
+├── SentryUtil.js         # Sentry helpers
+├── useBiometrics.js      # biometric authentication
+├── ConsentTH.js          # เนื้อหาความยินยอม (ไทย)
+└── ConsentEN.js          # เนื้อหาความยินยอม (อังกฤษ)
+```
+
+**⚠️ EventEmitter มี 2 instances:**
+1. `src/utils/eventEmitter.js` — ใช้โดย API layer + controls
+2. `src/helpers/Emitter/index.js` — ใช้โดย managers + อื่นๆ
+
+---
+
+## 17. Global Variables
+
+```javascript
+global.env          // environment (dev/prod)
+global.api_url      // API base URL
+global.api_token    // Bearer token
+global.deeplink_url // Deep link base URL
+```
+
+ค่าเหล่านี้ถูกตั้งใน `setEnv.js` และ hydrate จาก AsyncStorage
+
+---
+
+## 18. Error Handling Flow
+
+```
+API Call (apiService.js)
+  ↓ error
+axiosError() — dispatch: setUserInactive / setEmployeeNotFound
+  ↓
+Event.emit('NEW_AXIOS_ERROR', error)
+  ↓
+AxiosErrorControl — listens + handles 401/TOKEN_INVALID
+  ↓
+Global Modals in RootPage.js — แสดง modal ตาม state
+```
+
+---
+
+## 19. Notification Flow
+
+```
+Firebase Messaging → NotificationControl
+  ↓
+Notifee (display local notification)
+  ↓
+User taps notification
+  ↓
+useNotification hook
+  ↓
+NotificationNavigation — รอ PIN flow ถ้าจำเป็น
+  ↓
+Navigate to target screen
+```
+
+---
+
+## 20. Step Sync Flow
+
+```
+App foreground / Background fetch
+  ↓
+StepSyncManager
+  ↓
+HealthKit (iOS) / Health Connect (Android)
+  ↓
+Background Jobs (syncStepApp, uploadStep2, uploadHealthData)
+  ↓
+API calls (StepService, healthService)
+  ↓
+Redux updates (StepActions, HealthActions)
+```
+
+---
+
+## 21. i18n Keys หลัก
+
+ไฟล์: `src/assets/locales/th.js` / `en.js`
+
+### หมวดหมู่ keys:
+| Prefix | ใช้สำหรับ |
+|---|---|
+| `button.*` | ปุ่มทั่วไป (login, next, ok, save, cancel, confirm ฯลฯ) |
+| `intro.*` | หน้า intro |
+| `errorAlert.*` | ข้อความ error |
+| `login.*` | ระบบล็อกอิน, OTP, PIN |
+| `popup.*` | popup ทั่วไป |
+| `menu.*` | เมนูหลัก |
+| `dwb.*` | แบบประเมินอันตราย |
+| `home.*` | หน้าหลัก |
+| `office_syndrome.*` | ออฟฟิศซินโดรม |
+| `connect_device.*` | เชื่อมต่ออุปกรณ์ |
+| `step.*` | ก้าวเดิน |
+| `other.*` | เมนูอื่นๆ |
+| `profile.*` | โปรไฟล์ |
+| `account.*` | จัดการบัญชี |
+| `date.*` | วัน/เดือน |
+| `notifications.*` | การแจ้งเตือน |
+| `signup.*` | ลงทะเบียน |
+| `health_library.*` | คลังความรู้สุขภาพ |
+| `reward.*` | รางวัล |
+| `health_profile.*` | แฟ้มสุขภาพ |
+| `summary_health.*` | สรุปสุขภาพ |
+| `well_being.*` | สุขภาวะการทำงาน |
+| `msd.*` | MSD |
+| `consent.*` | ความยินยอม |
+| `mission.*` | ภารกิจ |
+| `company_mission.*` | ภารกิจองค์กร |
+| `point.*` | คะแนน |
+| `social.*` | โซเชียล |
+| `report.*` | รายงาน |
+| `achievement.*` | ความสำเร็จ |
+| `friend.*` | เพื่อน |
+| `notification.*` | การแจ้งเตือน |
+| `health_check.*` | ผลตรวจสุขภาพ |
+| `account_manage.*` | จัดการบัญชี |
+| `lucky_spin.*` | วงล้อนำโชค |
+
+---
+
+## 22. Coding Patterns สำคัญ
+
+### Styled Components Pattern:
+```javascript
+import styled from 'styled-components';
+
+const Container = styled.View`
+  flex: 1;
+  background-color: ${({theme: t}) => t.COLORS.WHITE_1};
+`;
+
+const Title = styled.Text`
+  font-family: ${({theme: t}) => t.FONT_FAMILY.TH.BOLD};
+  font-size: ${({theme: t}) => t.FONT_SIZE.SIZE_18}px;
+  color: ${({theme: t}) => t.COLORS.BLACK_1};
+`;
+```
+
+### Component Pattern:
+```javascript
+import React, {useState, useCallback} from 'react';
+import {useNavigation} from '@react-navigation/native';
+import {ROUTE_PATH} from '../../assets';
+import {ButtonApp, Headers} from '../../components';
+import i18n from '../../utils/i18n';
+
+const ScreenName = () => {
+  const navigation = useNavigation();
+  const [loading, setLoading] = useState(false);
+
+  return (
+    <Container>
+      <Headers title={i18n.t('screen.title')} />
+    </Container>
+  );
+};
+
+export default ScreenName;
+```
+
+### Import Order:
+1. React / React Native
+2. Third-party libraries
+3. Assets (theme, constants, locales)
+4. Components
+5. Widgets
+6. Store (actions, reducers)
+7. Helpers / Utils
+8. Local (Section/, sub-components)
+
+---
+
+## 23. Patches
+
+มี patches สำหรับ:
+- make-plural, react-native-sound, react-native-health
+- react-native-snap-carousel, react-native-slider
+- react-native-parallax-scroll-view, react-native-fast-image
+- react-native-countdown-component, react-native-barcode-builder
+
+---
+
+## 24. สิ่งสำคัญที่ต้องจำ
+
+1. ไม่มี TypeScript จริงๆ — ใช้ `.js` ทั้งหมด
+2. ไม่มี `.env` files — config อยู่ใน `setEnv.js` hardcoded
+3. `redux-persist` ถูก import แต่ไม่ได้ใช้
+4. `react-router-native` ถูก import ใน App.js แต่ไม่ได้ใช้ — legacy code
+5. Styling ใช้ styled-components ในไฟล์เดียวกัน
+6. Date libraries ใช้ 2 ตัว — dayjs (หลัก) + moment (legacy)
+7. EventEmitter มี 2 instances
+8. Sentry DSN hardcoded ใน App.js
+9. Font: Kanit (ทุก weight)
+10. patch-package ทำงานอัตโนมัติหลัง yarn install
+
+---
+
+## 25. CompanyMissionContainer — Modular Structure (อัพเดท 12 เม.ย. 2026)
+
+โครงสร้างหลังการ Refactor ตามหลัก Clean Code & Modular Architecture
+
+```
+CompanyMissionContainer/
+├── missionApiDisplay.js                    ← pure display helpers (API → UI mapping)
+├── utils/
+│   └── pagination.js                       ← computeNoMorePages helper
+│
+├── MainContainer/                          ← Detail screen (index.js: 146 บรรทัด)
+│   ├── index.js                            ← Orchestrator
+│   ├── hooks/
+│   │   └── useCompanyMissionDetail.js      ← fetch + state + computed values
+│   ├── utils/
+│   │   └── missionHelpers.js               ← getTargetType, getMissionMode, formatDate
+│   └── Section/
+│       ├── MainCardSection.js              ← card layout ทั้งหมด
+│       ├── SkeletonSection.js              ← loading skeleton
+│       ├── ConfirmJoinModal.js             ← confirm join modal (department mode)
+│       ├── SummaryResultCard.js            ← summary result UI
+│       ├── MissionInfoSection.js           ← target box + info table
+│       └── LeaderboardPreviewSection.js    ← leaderboard banner
+│
+├── ListContainer/                          ← Mission list screen (index.js: 153 บรรทัด)
+│   ├── index.js                            ← Orchestrator
+│   ├── hooks/
+│   │   └── useCompanyMissionList.js        ← Redux + refresh logic
+│   └── Section/
+│       ├── MissionListCard.js              ← grid card + carousel card (429 บรรทัด)
+│       ├── ActiveMissionsSection.js        ← horizontal carousel + dots
+│       ├── NotStartedSection.js            ← 2-column grid + empty state
+│       └── ListSkeletonSection.js          ← CarouselSkeleton + GridSkeleton
+│
+├── SelectTeamContainer/                    ← Select team screen (index.js: 122 บรรทัด)
+│   ├── index.js                            ← Orchestrator
+│   ├── hooks/
+│   │   └── useSelectTeam.js                ← fetch + state + join logic
+│   └── Section/
+│       ├── MissionHeaderCard.js            ← mission info card + tabs
+│       ├── TeamRow.js                      ← team list item
+│       ├── TeamRowSkeleton.js              ← shimmer skeleton
+│       ├── EmptyFullTeamsSection.js        ← empty state (full teams tab)
+│       └── ConfirmTeamModal.js             ← confirm join team modal
+│
+├── LeaderBoardContainer/                   ← Leaderboard screen (index.js: 187 บรรทัด)
+│   ├── index.js                            ← Orchestrator
+│   ├── hooks/
+│   │   └── useLeaderBoard.js               ← fetch + pagination + tab logic
+│   ├── utils/
+│   │   └── leaderboardHelpers.js           ← getDisplayTexts helper
+│   ├── Section/
+│   │   ├── TabBarSection.js                ← gradient header + tab bar
+│   │   └── MyRankSection.js                ← sticky my rank bar
+│   ├── Progress.js                         ← team progress summary
+│   └── TopRanking.js                       ← top 3 ranking display
+│
+├── MemberContainer/                        ← Member list screen
+├── HistoryContainer/                       ← History screen
+├── HistoryDetailContainer/                 ← History detail screen
+└── CardMemberMission/                      ← Shared card component
+```
+
+### กฎ Orchestrator Pattern:
+- `index.js` ของแต่ละ Container ต้องเป็น **Orchestrator เท่านั้น** (< 300 บรรทัด)
+- Logic → ย้ายเข้า `hooks/use[Feature].js`
+- UI Section → ย้ายเข้า `Section/[Name]Section.js` หรือ `Section/[Name]Modal.js`
+- Pure helpers → ย้ายเข้า `utils/[name]Helpers.js`
+
+---
+
+## 26. Performance Patterns — CompanyMission (อัพเดท 9 เม.ย. 2026)
+
+### ไฟล์ที่ optimize แล้ว:
+- `src/containers/CompanyMissionContainer/LeaderBoardContainer/index.js`
+- `src/containers/CompanyMissionContainer/MemberContainer/index.js`
+- `src/containers/CompanyMissionContainer/CardMemberMission/index.js`
+
+### Pattern: Pagination + onEndReached (FlatList)
+
+```javascript
+// Guard ป้องกัน double-fire ด้วย momentum ref
+const onEndReachedCalledDuringMomentum = useRef(true);
+
+const handleEndReached = useCallback(() => {
+  if (
+    !onEndReachedCalledDuringMomentum.current &&
+    !loading &&
+    !loadingMore &&
+    hasMore
+  ) {
+    fetchMore();
+    onEndReachedCalledDuringMomentum.current = true;
+  }
+}, [loading, loadingMore, hasMore, fetchMore]);
+
+const handleMomentumScrollBegin = useCallback(() => {
+  onEndReachedCalledDuringMomentum.current = false;
+}, []);
+
+<FlatList
+  onEndReached={handleEndReached}
+  onEndReachedThreshold={0.5}
+  onMomentumScrollBegin={handleMomentumScrollBegin}
+  removeClippedSubviews={true}
+  initialNumToRender={10}
+  maxToRenderPerBatch={10}
+  windowSize={10}
+/>
+```
+
+### Pattern: แยก loading / loadingMore
+
+```javascript
+// ✅ ถูก: initial load ใช้ loading, load more ใช้ loadingMore
+const fetchList = useCallback(async (currentPage = 1) => {
+  if (currentPage === 1) {
+    setLoading(true);      // แสดง skeleton ทั้งหน้า
+  } else {
+    setLoadingMore(true);  // แสดง skeleton footer เท่านั้น
+  }
+  // ...
+  if (currentPage === 1) {
+    setLoading(false);
+  } else {
+    setLoadingMore(false);
+  }
+}, []);
+
+// ❌ ผิด: setLoading(true) ทุกครั้ง → list กลายเป็น skeleton ทั้งหมดเวลา loadMore
+```
+
+### Pattern: hasMore จาก API page info
+
+```javascript
+// ตรวจสอบ hasMore จาก page.to / page.total ที่ API ส่งกลับ
+if (pageInfo) {
+  setHasMore((pageInfo.to ?? 0) < (pageInfo.total ?? 0));
+} else {
+  setHasMore(newItems.length >= PER_PAGE); // fallback
+}
+```
+
+### Pattern: Reset pagination เมื่อเปลี่ยน filter/tab
+
+```javascript
+const onSelectTab = useCallback(value => {
+  setSelectTab(value);
+  setDataList([]);   // clear list เดิม
+  setPage(1);        // reset page
+  setHasMore(true);  // reset hasMore
+}, []);
+```
+
+### Pattern: React.memo สำหรับ list item
+
+```javascript
+// ห่อ component ที่ใช้ใน FlatList ด้วย memo เสมอ
+export default memo(CardMemberMission);
+
+// ห่อ sub-component ด้วย memo ด้วย
+const AvatarGroupLocal = memo(({data, isMe}) => { ... });
+```
+
+### Pattern: Inline styles → constants
+
+```javascript
+// ❌ ผิด: สร้าง object ใหม่ทุก render
+<View style={{flex: 1, paddingRight: 8}} />
+
+// ✅ ถูก: ประกาศ constant นอก component
+const viewStyle = {flex: 1, paddingRight: 8};
+<View style={viewStyle} />
+```

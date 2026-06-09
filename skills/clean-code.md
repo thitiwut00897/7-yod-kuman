@@ -1,6 +1,6 @@
 # Clean Code & Modular Architecture Guide
 
-> **วัตถุประสงค์:** มาตรฐานการเขียน code ที่ clean และ modular สำหรับโปรเจกต์ปลายทาง (ปรับ path/naming ตาม repo จริง)  
+> **วัตถุประสงค์:** มาตรฐานการเขียน code ที่ clean และ modular สำหรับ Well Life TTIB  
 > **อัพเดทล่าสุด:** เมษายน 2026  
 > **ใช้เมื่อ:** สร้าง/แก้ไข Container, Component, Hook, หรือเมื่อไฟล์เริ่มยาวเกิน 300 บรรทัด  
 > **ความเรียบง่าย (บังคับทุกงาน):** `.cursor/rules/simple-code.mdc` — แยกไฟล์เพื่ออ่านง่าย ไม่ใช่เพื่อสร้าง abstraction หรือโครงสร้างที่ซับซ้อนโดยไม่จำเป็น

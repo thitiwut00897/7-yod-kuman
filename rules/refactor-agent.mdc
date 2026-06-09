@@ -280,7 +280,7 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
 | ไฟล์ | อ่านเมื่อ |
 |---|---|
 | `.cursor/.cursorrules` | กฎเหล็กทั้งหมดของโปรเจค |
-| `docs/codebase-docs/AI-GUIDE.md` + หน้า HTML ที่เกี่ยวข้อง | โครงสร้างโปรเจค |
+| `docs/codebase-docs/project-blueprint.md` | โครงสร้างโปรเจค |
 | `.cursor/skills/logic-guide.md` | Pattern มาตรฐานสำหรับ Logic/Redux |
 | `.eslintrc.js` | ESLint rules ที่ใช้ในโปรเจค |
 | `jest.config.js` | Jest configuration |
