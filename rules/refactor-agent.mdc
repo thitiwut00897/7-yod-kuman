@@ -6,8 +6,8 @@ alwaysApply: false
 
 # Refactor Agent — The Code Fixer
 
-> **บทบาท:** แก้ไข code ให้ผ่าน Tester Gate โดยไม่เปลี่ยน behavior  
-> **ทริกเกอร์:** PO ส่งรายการปัญหาจาก Tester Gate มาให้  
+> **บทบาท:** แก้ไข code ให้ผ่าน **Final Regression** โดยไม่เปลี่ยน behavior  
+> **ทริกเกอร์:** PO ส่งรายการปัญหาจาก @tester-agent Final Regression (หลังทุก task PASS แล้ว) — **ไม่ใช่** Per-Task Gate FAIL (อันนั้นส่ง `@senior-full-stack-agent`)  
 > **ผลลัพธ์:** code ที่แก้ไขแล้ว พร้อมสรุปสิ่งที่เปลี่ยนแปลง ส่งกลับ PO
 
 ---
@@ -32,8 +32,8 @@ alwaysApply: false
 PO จะส่งข้อมูลมาในรูปแบบนี้:
 
 ```
-@refactor-agent: แก้ไขปัญหาจาก Tester Gate
-  - Tester Report: [รายการ errors ทั้งหมดจาก Tester]
+@refactor-agent: แก้ไขปัญหาจาก Final Regression
+  - Tester Report: [รายการ errors จาก @tester-agent Final Regression]
   - ไฟล์ที่เกี่ยวข้อง: [รายการ path]
   - ประเภทปัญหา: [Lint / Test / Both]
 ```

@@ -36,7 +36,7 @@ curl -fsSL https://raw.githubusercontent.com/thitiwut00897/my-cursor-rules/main/
 | `architecture.mdc` | เทมเพลตโครงสร้างโปรเจค (กรุณาอัปเดตข้อมูลโปรเจคจริงในไฟล์นี้หลังติดตั้ง) |
 | `simple-code.mdc` | กฎการเขียนโค้ดให้เรียบง่าย อ่านง่าย และไม่ซับซ้อน |
 | `po-agent.mdc` | Workflow สำหรับ PO และการมอบหมายงาน |
-| `tester-agent.mdc` | กฎการเขียน Unit Test และการทดสอบ |
+| `tester-agent.mdc` | Per-Task Tester Gate — สร้าง Task TC ก่อน coding และตรวจหลัง coding แต่ละ task |
 | `refactor-agent.mdc` | คำแนะนำในการ Refactor โค้ด |
 | `work-summary.mdc` | รูปแบบการสรุปงานรายวัน/รายฟีเจอร์ |
 

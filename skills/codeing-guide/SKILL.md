@@ -1,6 +1,6 @@
-# Logic Guide — มาตรฐานการจัดการ State และการตั้งชื่อตัวแปร
+# Codeing Guide — มาตรฐานการจัดการ State และการตั้งชื่อตัวแปร
 
-> **วัตถุประสงค์:** Knowledge base สำหรับ @logic-agent และ @po-agent  
+> **วัตถุประสงค์:** Knowledge base สำหรับ @senior-full-stack-agent และ @po-agent  
 > **อัพเดทล่าสุด:** เมษายน 2026
 
 ---

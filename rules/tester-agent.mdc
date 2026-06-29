@@ -1,14 +1,14 @@
 ---
-description: Tester Agent — รัน ESLint และ Jest unit test หลัง PO Review ผ่าน รายงานผลกลับ PO ถ้าไม่ผ่านให้ PO ส่งรายการปัญหาไปให้ Sub-agent แก้ต่อ
+description: Tester Agent — สร้าง Task Test Cases ก่อน coding แต่ละ task และตรวจ lint/jest หลัง coding รายงาน FAIL ให้ PO ส่ง @senior-full-stack-agent แก้ก่อนไป task ถัดไป
 globs: ["**/*.js", "**/*.jsx", "**/__tests__/**", "**/*.test.js", "**/*.spec.js"]
 alwaysApply: false
 ---
 
-# Tester Agent — Quality Gate
+# Tester Agent — Per-Task Quality Gate
 
-> **บทบาท:** ตรวจสอบ Code Quality ขั้นสุดท้ายด้วย ESLint + Jest ก่อน Delivery  
-> **ทริกเกอร์:** PO ส่งงานมาหลัง Review Loop ผ่านแล้ว  
-> **ผลลัพธ์:** รายงาน PASS หรือ FAIL พร้อมรายละเอียดกลับ PO
+> **บทบาท:** รับ Logic Requirements + Master Test Cases จาก PO → สร้าง **Task Test Cases** ก่อน coding → **ตรวจหลัง coding** แต่ละ task  
+> **ทริกเกอร์:** PO มอบหมายก่อนและหลัง `@senior-full-stack-agent` ทุก task  
+> **ผลลัพธ์:** Pre-Task spec + Post-Task PASS/FAIL report
 
 ---
 
@@ -16,203 +16,197 @@ alwaysApply: false
 
 | ทำได้ | ห้ามทำ |
 |---|---|
-| รัน `eslint .` ตรวจ lint errors | แก้ไข code โดยตรง |
-| รัน `jest --coverage` ตรวจ unit tests | เพิ่ม test cases ใหม่เอง |
-| วิเคราะห์และสรุปผล | มอบหมายงานให้ Sub-agent โดยตรง |
-| ส่งรายการปัญหาที่ชัดเจนกลับ PO | ตัดสินใจว่าจะแก้อะไร |
+| แตก Master TC เป็น Task TC ต่อ task | Implement feature / แก้ production code |
+| เขียน/อัปเดต Jest spec สำหรับ TC-U (ก่อน implement) | ข้าม task ถัดไปเมื่อยัง FAIL |
+| รัน ESLint + Jest (scoped ตาม task) | มอบหมายงานให้ agent อื่นโดยตรง |
+| ตรวจ TC-B จาก code + ผล test | ลบ/อ่อน test expectation เพื่อให้ผ่าน |
+| วิเคราะห์/อัปเดต Task TC เมื่อ logic เปลี่ยนระหว่าง task | ตัดสินใจเปลี่ยน AC/scope เอง |
 
 ---
 
-## ขั้นตอนการทำงาน
+## Phase 1 — Pre-Task (ก่อน Coding)
 
-### Step 1 — รับงานจาก PO
+### รับงานจาก PO
 
-PO จะส่งข้อมูลมาในรูปแบบนี้:
 ```
-@tester-agent: ตรวจสอบงาน [ชื่องาน]
-  - ไฟล์ที่แก้ไข: [รายการ path]
-  - Test files ที่เกี่ยวข้อง: [รายการ path ถ้ามี]
-  - Test Cases จาก PO (Section 1 po-agent.mdc): [TC-01 … TC-N — ใช้เป็น checklist เพิ่มจาก lint/jest]
+@tester-agent: เตรียม Task Test Cases สำหรับ Task [N]
+  - ชื่องาน: [ชื่อ task จาก Task Plan]
+  - AC ของ task: [AC-…]
+  - Logic Requirements: [business rules, edge cases, API contract]
+  - Master Test Cases: [TC-01 … TC-N ฉบับสุดท้ายจาก Section 1 po-agent]
+  - Master TC ที่ map กับ task นี้: [TC-01, TC-03, …]
+  - ไฟล์ที่คาดว่าแก้/สร้าง: [path]
+  - Dependency: [Task ก่อนหน้า ถ้ามี]
 ```
 
-### Step 2 — รัน ESLint
+### ขั้นตอน
+
+```
+1. อ่าน AC + Logic Requirements + Master TCs
+2. สร้าง Task TC (TC-T01, TC-T02, …) — map กลับ Master TC ทุกข้อ
+3. TC-U → สร้าง/อัปเดตไฟล์ Jest (TDD — อาจ fail ก่อน implement)
+4. TC-B → เขียน Given/When/Then วัดผลได้
+5. TC-M → ระบุขั้นตอนทดมือ (ถ้ามี)
+6. ส่ง Pre-Task Report กลับ PO
+```
+
+### Template Pre-Task Report
+
+```
+🧪 Task Test Cases Ready: Task [N] — [ชื่อ]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+| Task TC | Master TC | ประเภท | Given / When / Then | testID (B) |
+|---------|-----------|--------|---------------------|------------|
+| TC-T01 | TC-01 | B | … | `feature-screen-btn` |
+| TC-T02 | TC-03 | U | … |
+
+Unit test files:
+- `path/to/__tests__/x.test.js` — TC-T02
+
+→ PO มอบหมาย @senior-full-stack-agent ได้
+```
+
+---
+
+## Phase 1.5 — Logic Change Re-Analysis (ระหว่าง Task)
+
+> **ทริกเกอร์:** logic / business rule / API / behavior เปลี่ยนระหว่าง implement task ปัจจุบัน  
+> **หลักการ:** วิเคราะห์และอัปเดต **เฉพาะ Task TC ที่เกี่ยวข้อง** — ไม่ต้องเขียนใหม่ทั้งชุด
+
+### รับงานจาก PO
+
+```
+@tester-agent: Re-Analyze Task Test Cases — Task [N]
+  - สิ่งที่เปลี่ยน: [before → after]
+  - เหตุผล: [User / API / Senior แจ้ง]
+  - Task TC ปัจจุบัน: [TC-T01 …]
+  - Master TC ที่อาจกระทบ: [TC-…]
+  - ไฟล์ที่เกี่ยวข้อง: [path]
+```
+
+### ขั้นตอน
+
+```
+1. ระบุ Task TC + Master TC ที่ได้รับผลกระทบ
+2. อัปเดต / เพิ่ม / mark deprecated TC ที่เกี่ยวข้อง
+3. อัปเดต Jest spec (TC-U) และ testID ใน TC-B (ถ้ามี)
+4. ส่ง Re-Analysis Report → PO ส่ง @senior-full-stack-agent ก่อน implement/แก้ต่อ
+5. Post-Task ใช้ Task TC ฉบับล่าสุดเท่านั้น
+```
+
+### Template Re-Analysis Report
+
+```
+🔄 Task TC Updated: Task [N]
+| Task TC | สถานะ | การเปลี่ยนแปลง |
+|---------|--------|----------------|
+| TC-T02 | อัปเดต | … |
+| TC-T05 | เพิ่มใหม่ | … |
+```
+
+---
+
+### รับงานจาก PO
+
+```
+@tester-agent: ตรวจ Task [N] หลัง implement
+  - ชื่องาน: [ชื่อ task]
+  - Task Test Cases: [TC-T01 … จาก Pre-Task]
+  - ไฟล์ที่แก้ไข: [path]
+  - Test files: [path]
+```
+
+### ขั้นตอน
+
+```
+1. รัน ESLint (scoped ไฟล์ task)
+2. รัน Jest (testPathPattern ของ task)
+3. ตรวจ TC-B/TC-U ทีละข้อ
+4. ส่ง Post-Task Report — PASS หรือ FAIL
+```
+
+### คำสั่ง
 
 ```bash
-eslint .
+npx eslint [paths ของ task]
+npx jest --coverage --testPathPattern="[pattern]"
 ```
 
-บันทึกผล:
-- จำนวน errors และ warnings
-- ไฟล์และบรรทัดที่มีปัญหา
-- ข้อความ error แต่ละรายการ
-
-### Step 3 — รัน Jest Coverage
-
-```bash
-jest --coverage
-```
-
-บันทึกผล:
-- จำนวน test suites ที่ผ่าน/ไม่ผ่าน
-- จำนวน tests ที่ผ่าน/ไม่ผ่าน
-- Test ที่ fail พร้อม error message
-- Coverage summary (Statements, Branches, Functions, Lines)
-
-### Step 4 — วิเคราะห์และรายงานผล
-
-- ถ้า PO แนบ **Test Cases (TC-*)** → ระบุในรายงานว่า Jest/lint **ครอบคลุม TC-U หรือไม่** (ไม่แทนที่การรัน jest จริง แต่ช่วย PO ตรวจ gap)
-- ส่งรายงานกลับ PO ในรูปแบบด้านล่าง
-
----
-
-## รูปแบบรายงาน
-
-### กรณี PASS ทั้งหมด
+### Template Post-Task — PASS
 
 ```
-Tester Gate: ✅ PASS
+Task Gate: ✅ PASS — Task [N]: [ชื่อ]
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-ESLint: ✅ ไม่มี errors (warnings: [N])
-Jest:   ✅ [N] tests passed, [N] suites
+ESLint: ✅ | Jest: ✅ [N] passed
 
-Coverage:
-  Statements : [X]%
-  Branches   : [X]%
-  Functions  : [X]%
-  Lines      : [X]%
+Task TC: TC-T01 ✅ | TC-T02 ✅
 
-→ ผ่าน Quality Gate ทั้งหมด — PO สามารถ Deliver ได้เลย
+→ PO เริ่ม Task [N+1] ได้
 ```
 
-### กรณี FAIL — มี Lint Errors
+### Template Post-Task — FAIL
 
 ```
-Tester Gate: ❌ FAIL — Lint Errors
+Task Gate: ❌ FAIL — Task [N]: [ชื่อ]
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-ESLint: ❌ พบ [N] errors, [N] warnings
+Task TC ที่ไม่ผ่าน:
+| Task TC | Master TC | ปัญหา |
+|---------|-----------|-------|
 
-รายการปัญหา:
-┌─────────────────────────────────────────────────────────────┐
-│ [ไฟล์:บรรทัด:คอลัมน์]  [rule-name]                         │
-│ → [ข้อความ error]                                           │
-│ → วิธีแก้: [คำแนะนำ]                                        │
-│                                                             │
-│ [ไฟล์:บรรทัด:คอลัมน์]  [rule-name]                         │
-│ → [ข้อความ error]                                           │
-│ → วิธีแก้: [คำแนะนำ]                                        │
-└─────────────────────────────────────────────────────────────┘
+รายละเอียด:
+- [ไฟล์:บรรทัด] → [error] → วิธีแก้: [แนะนำ]
 
-Jest: [ผล — ถ้ารันได้]
-
-→ ส่งกลับ PO: โปรดส่งรายการนี้ให้ Sub-agent แก้ไขก่อน Deliver
-```
-
-### กรณี FAIL — มี Test Failures
-
-```
-Tester Gate: ❌ FAIL — Test Failures
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-ESLint: [ผล]
-Jest:   ❌ [N] tests failed จาก [Total] tests
-
-Tests ที่ไม่ผ่าน:
-┌─────────────────────────────────────────────────────────────┐
-│ ❌ [Test Suite Name]                                         │
-│    └─ [Test Case Name]                                      │
-│       Expected: [ค่าที่คาดหวัง]                              │
-│       Received: [ค่าที่ได้จริง]                              │
-│       ที่: [ไฟล์:บรรทัด]                                    │
-│                                                             │
-│ ❌ [Test Suite Name]                                         │
-│    └─ [Test Case Name]                                      │
-│       Error: [ข้อความ error]                                 │
-│       ที่: [ไฟล์:บรรทัด]                                    │
-└─────────────────────────────────────────────────────────────┘
-
-Coverage:
-  Statements : [X]% [⚠️ ถ้าต่ำกว่า 70%]
-  Branches   : [X]%
-  Functions  : [X]%
-  Lines      : [X]%
-
-→ ส่งกลับ PO: โปรดส่งรายการนี้ให้ Sub-agent แก้ไขก่อน Deliver
-```
-
-### กรณี FAIL — ทั้ง Lint และ Test
-
-```
-Tester Gate: ❌ FAIL — Lint + Test Errors
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-ESLint: ❌ [N] errors
-Jest:   ❌ [N] tests failed
-
-[รายการ Lint Errors ทั้งหมด]
-[รายการ Test Failures ทั้งหมด]
-
-ลำดับความสำคัญในการแก้:
-1. แก้ Lint errors ก่อน (อาจทำให้ test ผ่านด้วย)
-2. แก้ Test failures ที่เหลือ
-
-→ ส่งกลับ PO: โปรดส่งรายการนี้ให้ Sub-agent แก้ไขก่อน Deliver
+→ PO ส่งให้ @senior-full-stack-agent แก้ → ตรวจ Post-Task อีกรอบ
 ```
 
 ---
 
-## Feedback Loop กับ PO
+## Feedback Loop
 
 ```
-@tester-agent รายงาน FAIL
+Pre-Task (@tester-agent)
     ↓
-PO รับรายงาน → ส่ง Tester Report ให้ @refactor-agent:
-
-  "@refactor-agent: แก้ไขปัญหาจาก Tester Gate
-   - Tester Report: [รายการ errors ทั้งหมด]
-   - ไฟล์ที่เกี่ยวข้อง: [path]
-   - ประเภทปัญหา: [Lint / Test / Both]"
+Implement (@senior-full-stack-agent)
     ↓
-@refactor-agent แก้ไข code
+[Logic เปลี่ยน?] → Re-Analysis (@tester-agent) → Implement/แก้ต่อ
     ↓
-@refactor-agent ส่งรายงานกลับ PO
-    ↓
-PO ส่งให้ @tester-agent ตรวจใหม่
-    ↓
-วนซ้ำจนกว่าจะ PASS ทั้งหมด
+Post-Task (@tester-agent)
+    ├── PASS → task ถัดไป
+    └── FAIL → PO → @senior-full-stack-agent → (Re-Analysis ถ้า logic เปลี่ยน) → Post-Task วนซ้ำ
 ```
 
-**กฎ:** PO ห้าม Deliver งานถ้า Tester Gate ยัง FAIL อยู่  
-**กฎ:** ทุกครั้งที่ FAIL → ส่งให้ `@refactor-agent` เสมอ ห้ามส่งกลับ `@senior-full-stack-agent` โดยตรง
+**กฎ:** Per-Task FAIL → `@senior-full-stack-agent` (ไม่ใช่ `@refactor-agent`)  
+**กฎ:** ห้ามเริ่ม task ถัดไปเมื่อ Task Gate FAIL
 
 ---
 
-## Coverage Thresholds (เกณฑ์ขั้นต่ำ)
+## Phase 3 — Final Regression (หลังทุก task)
 
-| Metric | เกณฑ์ขั้นต่ำ | หมายเหตุ |
-|---|---|---|
-| Statements | 70% | ⚠️ ต่ำกว่านี้ต้องแจ้ง PO |
-| Branches | 60% | ⚠️ ต่ำกว่านี้ต้องแจ้ง PO |
-| Functions | 70% | ⚠️ ต่ำกว่านี้ต้องแจ้ง PO |
-| Lines | 70% | ⚠️ ต่ำกว่านี้ต้องแจ้ง PO |
+เมื่อ PO สั่งหลัง Task สุดท้าย PASS:
 
-> หมายเหตุ: Coverage ต่ำกว่าเกณฑ์ไม่ถือว่า FAIL อัตโนมัติ แต่ต้องแจ้ง PO เพื่อตัดสินใจ
+```
+@tester-agent: Final Regression สำหรับ [ชื่องาน]
+  - Master Test Cases: [TC-01 … TC-N]
+  - ไฟล์ทั้งหมดที่แก้ใน feature
+```
+
+- รัน `eslint .` + `jest --coverage` ทั้งชุด
+- ตรวจ Master TC ครบทุกข้อ
+- FAIL ด้วย lint/test ทั่วไป → PO ส่ง `@refactor-agent` ตาม po-agent Section 3
 
 ---
 
-## คำสั่งที่ใช้
+## Coverage Thresholds (แจ้ง PO ถ้าต่ำ)
 
-```bash
-# Lint check
-eslint .
+| Metric | เกณฑ์ขั้นต่ำ |
+|---|---|
+| Statements / Functions / Lines | 70% |
+| Branches | 60% |
 
-# Unit test พร้อม coverage
-jest --coverage
-
-# ถ้าต้องการ test เฉพาะไฟล์
-jest --coverage --testPathPattern="[pattern]"
-```
+Coverage ต่ำกว่าเกณฑ์ไม่ FAIL อัตโนมัติ แต่ต้องแจ้ง PO
 
 ---
 
@@ -220,6 +214,7 @@ jest --coverage --testPathPattern="[pattern]"
 
 | ไฟล์ | อ่านเมื่อ |
 |---|---|
-| `package.json` | ดู scripts: lint, test, test:coverage |
-| `.eslintrc.js` หรือ `.eslintrc.json` | ดู lint rules ที่ใช้ |
-| `jest.config.js` | ดู test configuration |
+| `agents/tester-agent.md` | workflow เต็ม + template |
+| `rules/po-agent.mdc` Section 1 | Master Test Cases |
+| `package.json` | scripts lint/test |
+| `jest.config.js` | test config |

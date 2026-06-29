@@ -1,6 +1,6 @@
-# UI Guide — เทคนิค Layout และจุดที่ AI มักพลาดใน React Native
+# UI Guide template project TT — เทคนิค Layout และจุดที่ AI มักพลาดใน React Native
 
-> **วัตถุประสงค์:** Knowledge base สำหรับ @ui-agent และ @po-agent  
+> **วัตถุประสงค์:** Knowledge base สำหรับ @senior-full-stack-agent และ @po-agent  
 > **อัพเดทล่าสุด:** เมษายน 2026
 
 ---

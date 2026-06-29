@@ -1,4 +1,4 @@
-# Debug Flow — Visual Markers & Screenshot Workflow
+# Debug Flow UI — Visual Markers & Screenshot Workflow
 
 > **วัตถุประสงค์:** มาตรฐานการใช้ Visual Markers และการอ่าน Screenshot สำหรับทุก Agent  
 > **อัพเดทล่าสุด:** เมษายน 2026
