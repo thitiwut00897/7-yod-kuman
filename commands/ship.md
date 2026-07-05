@@ -6,7 +6,7 @@ description: Ship stage — parallel fan-out (code-reviewer + security-auditor +
 
 ## เช็คก่อนว่าต้อง fan-out ไหม
 
-Skip fan-out ได้เฉพาะเมื่อ **ครบทุกข้อ**: diff แตะ ≤2 ไฟล์, dif <50 บรรทัด, ไม่แตะ auth/payment/data/config — นอกนั้น fan-out เสมอ
+Skip fan-out ได้เฉพาะเมื่อ **ครบทุกข้อ**: diff แตะ ≤2 ไฟล์, diff <50 บรรทัด, ไม่แตะ auth/payment/data/config — นอกนั้น fan-out เสมอ
 
 ## Phase A — Fan-out พร้อมกัน (ถ้าไม่ skip)
 
