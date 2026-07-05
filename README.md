@@ -1,104 +1,166 @@
-# my-claude-rules
+# 🧭 my-claude-rules
 
-Personal dev-workflow kit distributed as a native **Claude Code plugin** — install once, get 7 agents, 12 skills, 8 slash commands, and an always-on safety hook, with zero files copied into your project.
+> **Personal dev-workflow kit** สำหรับ Claude Code — ติดตั้งครั้งเดียว ได้ทีม AI agent ครบวงจรตั้งแต่เก็บ requirement จนถึงตัดสินใจ ship โดยไม่มีไฟล์ถูก copy เข้าโปรเจกต์ของคุณ
+
+**7 Agents · 8 Commands · 12 Skills · 1 Always-on Hook**
+
+🌐 **เวอร์ชัน web สวยๆ อ่านง่าย:** [my-claude-rules overview](https://claude.ai/code/artifact/486e539b-2c2c-4e35-a5dd-1dd77aafc615)
 
 ---
 
-## Install
+## ⚡ ติดตั้ง
 
 ```
 /plugin marketplace add thitiwut00897/my-cursor-rules
 /plugin install my-claude-rules
 ```
 
-## Update
+อัปเดตด้วย `/plugin update my-claude-rules` — ตัว plugin อยู่ใน global cache ของ Claude Code ไม่แตะ repo ของคุณเลย มีเพียง `/init-project-docs` และ `/po-workflow` เท่านั้นที่เขียนไฟล์เข้าโปรเจกต์ และเฉพาะตอนที่คุณสั่งเอง
 
-```
-/plugin update my-claude-rules
-```
-
-Nothing in your project is touched by install/update — plugin content lives in Claude Code's global plugin cache, not in your repo. `/init-project-docs` and `/po-workflow` (below) are the only things that write into a project, and only when you run them yourself.
-
-## First use in a new project (optional)
+### เริ่มใช้ในโปรเจกต์ใหม่ (ทางเลือก — รันครั้งเดียวต่อโปรเจกต์)
 
 ```
 /init-project-docs
 ```
 
-Scaffolds `docs/codebase-docs/project-blueprint.md` + `AI-GUIDE.md` and adds a reference line to your project's `CLAUDE.md`. Run once per project, whenever you want.
+สร้าง `docs/codebase-docs/project-blueprint.md` + `AI-GUIDE.md` และผูก reference เข้า `CLAUDE.md` ให้อัตโนมัติ — ไฟล์นี้คือ "สมอง" ที่ทุก agent ใช้อ่าน stack, คำสั่ง lint/test, และ convention ของโปรเจกต์ (แทนการเดา)
 
 ---
 
-## What's included
+## 🔄 Workflow 6 Stage ทำงานยังไง
 
-### Agents (`@agent-name`)
+สั่ง `/po-workflow` คำสั่งเดียว — `@po-agent` จะ orchestrate ทั้ง 6 stage ให้ **ห้ามข้าม gate** และหยุดรอคุณ confirm ในจุดสำคัญเสมอ:
 
-| Agent | Invoke | What it does |
+```mermaid
+flowchart TD
+    A["📋 1. Define — /spec<br/><i>อ่านการ์ด Jira ให้ครบ (ถ้ามี) → สรุป → เขียน SPEC.md</i>"]
+    B["🗺️ 2. Plan — /plan<br/><i>แบ่ง vertical-slice task fullstack → tasks/plan.md</i>"]
+    C["🔨 3. Build — /build [auto]<br/><i>TDD ทีละ task: RED → GREEN → commit บน feature branch</i>"]
+    D["🧪 4. Verify — /verify<br/><i>full regression + user เช็ค UI รวมทั้งฟีเจอร์</i>"]
+    E["🔍 5. Review — /review<br/><i>5-axis review + OWASP security audit</i>"]
+    F["🚀 6. Ship — /ship<br/><i>fan-out 3 agent → GO/NO-GO + rollback plan</i>"]
+
+    A -->|"✋ user confirm SPEC.md"| B
+    B -->|"✋ user approve plan"| C
+    C -->|"ทุก task complete"| D
+    D -->|"PASS"| E
+    D -.->|"FAIL → @refactor-agent แก้ → verify ซ้ำ"| D
+    E -->|"ไม่มี Critical เหลือ"| F
+    E -.->|"มี Critical → แก้ → review ซ้ำ"| E
+```
+
+### จุดสำคัญที่ควรรู้
+
+- 🎫 **ไม่มีการ์ด Jira ก็ใช้ได้เต็มรูปแบบ** — Jira เป็น optional ทุกจุด: `/spec` จะถามว่ามีการ์ดไหม ถ้าไม่มีก็ใช้คำอธิบายของคุณตรงๆ, `/plan` ข้ามการสร้าง subtask, branch ตั้งชื่อ `feature/{short-name}` แทน `feature/{JIRA-KEY}/{short-name}`
+- 🎚️ **Opt-in เท่านั้น** — lifecycle เริ่มเมื่อคุณสั่ง `/po-workflow` เอง ไม่รันอัตโนมัติ งานเล็กๆ คุยตรงๆ หรือ mention agent ที่ต้องการได้เลย
+- 🧩 **รันแยกทีละ stage ก็ได้** — เรียก `/spec` `/plan` `/build` `/verify` `/review` `/ship` เองตามจังหวะที่ต้องการ ไม่ต้องผ่าน po-agent
+
+---
+
+## 💡 ตัวอย่างการใช้งาน
+
+### 1) ฟีเจอร์เต็มรูปแบบ — ไม่มีการ์ด Jira
+
+```
+/po-workflow เพิ่มหน้าประวัติการสั่งซื้อ พร้อม filter ตามช่วงเวลา และ export CSV
+```
+
+`/spec` จะถามว่ามีการ์ด Jira ไหม → ตอบ "ไม่มี" → ใช้คำอธิบายข้างบนเป็น requirement ตรงๆ → สรุปให้คุณ confirm → ได้ `SPEC.md` → `/plan` แบ่ง task ให้ approve → ไล่ Build → Verify → Review → Ship จนจบ
+
+### 2) รันทีละ stage เอง — ควบคุมเต็มที่
+
+```
+/spec เพิ่มปุ่ม export CSV ในหน้ารายงานยอดขาย
+/plan
+/build          # ทำ task ถัดไป 1 ตัวแล้วหยุดรอ
+/build auto     # หรือรันทุก task รวดเดียว (ขอ approve ครั้งเดียว)
+/verify
+/review
+/ship
+```
+
+โหมด `auto` จะหยุดถามเองเมื่อเจอ task ที่ high-risk (auth, payment, migration), AC คลุมเครือ, หรือแก้ test fail ไม่ได้ — แก้ปัญหาแล้วสั่ง `/build auto` ซ้ำ จะ resume จาก task ที่ค้าง
+
+### 3) งานเล็ก — เรียก agent ตรงๆ ไม่ต้องเข้า lifecycle
+
+```
+@code-reviewer ช่วยรีวิว diff ล่าสุดให้หน่อย
+@security-auditor เช็ค endpoint ใหม่ที่เพิ่งเพิ่มว่ามีช่องโหว่ auth ไหม
+@refactor-agent แก้ lint error ทั้งหมดโดยไม่เปลี่ยน behavior
+```
+
+---
+
+## 🤖 Agents (7 ตัว)
+
+แต่ละตัวมีขอบเขตชัดเจน รับคำสั่งเฉพาะจาก stage ที่กำหนด — ไม่ทำงานข้ามหน้าที่กัน
+
+| Agent | เรียกผ่าน | หน้าที่ |
 |---|---|---|
-| `po-agent` | `@po-agent` or `/po-workflow` | Orchestrates the full 6-stage lifecycle: Define → Plan → Build → Verify → Review → Ship |
-| `tester-agent` | Called by `/build`, `/verify` | Writes failing tests from a task's AC before implementation (RED); runs full regression at Verify |
-| `senior-full-stack-agent` | Called by `/build` | Implements backend then frontend to pass tests (GREEN) — any stack, per `project-blueprint.md` |
-| `refactor-agent` | Called by `/verify`, `/review` | Fixes lint/test failures or Critical review findings without changing behavior |
-| `code-reviewer` | Called by `/review`, `/ship` | 5-axis review: correctness, readability, architecture, security, performance |
-| `security-auditor` | Called by `/review`, `/ship` | OWASP-style audit: secrets, auth/authz, dependency CVEs |
-| `test-engineer` | Called by `/ship` | Analyzes test coverage gaps across the whole feature before shipping |
+| 🧭 `po-agent` | `/po-workflow` หรือ `@po-agent` | Orchestrator ทั้ง 6 stage — คุมลำดับ บังคับ gate หยุดรอ confirm ห้ามเดาว่า user โอเคแล้วเดินหน้าเอง |
+| 🔴 `tester-agent` | `/build`, `/verify` | เขียน test ที่ต้อง FAIL ก่อน implement (RED) จาก AC ของ task และรัน full regression ตอน Verify — ห้ามแตะ production code |
+| 🟢 `senior-full-stack-agent` | `/build`, `/review` | Implement backend ก่อนแล้วต่อ frontend ให้ test ผ่าน (GREEN) — ไม่ผูก stack อ่านจริงจาก `project-blueprint.md` |
+| 🔧 `refactor-agent` | `/verify`, `/review` | แก้ lint/test failure และ Critical finding โดย**ไม่เปลี่ยน behavior** — ห้ามลบ test ห้ามแก้ expectation ให้ตรง code ที่ผิด |
+| 🔍 `code-reviewer` | `/review`, `/ship` | รีวิว 5 มุมมอง: correctness, readability, architecture, security, performance — ทุก finding มี file:line + วิธีแก้ |
+| 🛡️ `security-auditor` | `/review`, `/ship` | Audit แนวลึกแบบ OWASP Top 10 — injection, auth/authz, secrets, dependency CVE — Critical/High บล็อก ship ทันที |
+| 📊 `test-engineer` | `/ship` เท่านั้น | วิเคราะห์ coverage gap ทั้งฟีเจอร์ (happy path, edge case, error path, concurrency) — ชี้ gap ไม่เขียน test เอง |
 
-The full lifecycle is **opt-in** — it does not run automatically. Use `/po-workflow` to start it for a feature, or run `/spec /plan /build /verify /review /ship` individually. Small tasks don't need any of this.
+## ⌨️ Commands (8 คำสั่ง)
 
-### Commands (`/command-name`)
+| คำสั่ง | ทำอะไร | ผลลัพธ์ |
+|---|---|---|
+| `/po-workflow [งาน/การ์ด]` | เริ่ม lifecycle เต็ม 6 stage ผ่าน @po-agent | ฟีเจอร์เสร็จพร้อม ship |
+| `/spec [งาน/การ์ด]` | เก็บ requirement + confirm ความเข้าใจ | `SPEC.md` |
+| `/plan` | แบ่งเป็น vertical-slice task (read-only ห้ามแก้ไฟล์) | `tasks/plan.md` + `tasks/todo.md` |
+| `/build [auto]` | implement แบบ TDD ทีละ task บน feature branch จาก develop | commit แยกต่อ task |
+| `/verify` | full regression (lint + test + build เต็มชุด) + user เช็ค UI รวม | PASS / FAIL report |
+| `/review` | 5-axis review + security audit บน diff ทั้ง branch | รายงาน Critical / Important / Suggestion |
+| `/ship` | fan-out 3 agent พร้อมกัน → รวมผล 6 หมวด | **GO/NO-GO** + rollback plan บังคับ |
+| `/init-project-docs` | สร้าง `project-blueprint.md` + `AI-GUIDE.md` (idempotent รันซ้ำได้) | เอกสาร baseline ของโปรเจกต์ |
 
-| Command | What it does |
+## 🧩 Skills (12 ตัว)
+
+Claude เรียกใช้เองอัตโนมัติเมื่อเข้าเงื่อนไข หรืออ้างชื่อตรงๆ ได้ เช่น *"ใช้ skill clean-code แยกไฟล์นี้หน่อย"*
+
+| Skill | ใช้เมื่อ |
 |---|---|
-| `/po-workflow [description or Jira link]` | Runs the full opt-in 6-stage lifecycle for the described task/feature |
-| `/spec [Jira link or description]` | Define stage — reads a Jira card fully (or asks if none), confirms understanding, writes `SPEC.md` |
-| `/plan` | Plan stage — slices `SPEC.md` into fullstack vertical-slice tasks, creates Jira subtasks, saves `tasks/plan.md` + `tasks/todo.md` |
-| `/build [auto]` | Build stage — implements one task (or all, in `auto` mode) on a `develop`-based feature branch, syncing Jira status per task |
-| `/verify` | Verify stage — full regression after all tasks are done, plus a user UI check |
-| `/review` | Review stage — 5-axis review + security audit; Critical findings block progress |
-| `/ship` | Ship stage — parallel fan-out (code-reviewer + security-auditor + test-engineer) → GO/NO-GO + mandatory rollback plan |
-| `/init-project-docs` | Scaffolds `project-blueprint.md` + `AI-GUIDE.md` into the current project and links them from `CLAUDE.md` |
+| `clean-code` | สร้าง/แก้ Container, Component, Hook หรือไฟล์เกิน ~300 บรรทัด (React Native) |
+| `codeing-guide` | ตั้งชื่อตัวแปร/ฟังก์ชัน, จัดการ state ด้วย Redux/hooks |
+| `ui-guide-template` | งาน layout/Flexbox ใน React Native ที่ซับซ้อน |
+| `visual-markers` | Visual Audit — ใส่ debug border แล้วอ่าน screenshot เทียบ design |
+| `scroll-bottom-safe-area` | ScrollView ที่เนื้อหาท้ายจอโดน navigation bar / home indicator บัง |
+| `render-html-guide` | ใช้ `react-native-render-html` กับฟอนต์ Kanit |
+| `api-design` | ออกแบบ/รีวิว REST API — naming, status code, pagination, versioning |
+| `archify` | สร้าง diagram (architecture, sequence, state) เป็น HTML สวยๆ export PNG/SVG ได้ |
+| `baseline-ui` | งาน Tailwind — animation duration, typography scale, layout anti-pattern |
+| `fixing-accessibility` | form/dialog/control — ARIA, keyboard nav, focus, contrast |
+| `fixing-motion-performance` | animation กระตุก — layout thrashing, compositor properties |
+| `system-optimization` | จบงานที่แก้เกิน 1 รอบ — บันทึก lessons learned กันพลาดซ้ำ |
 
-### Skills (auto-triggered by Claude based on description, or reference them by name)
+## 🛡️ Always-on Rules (ไม่ต้องเรียก — ทำงานเองทุก session)
 
-| Skill | Use when |
-|---|---|
-| `clean-code` | Creating/editing a Container, Component, or Hook; file exceeds ~300 lines |
-| `codeing-guide` | Naming conventions, state management (Redux/hooks) |
-| `ui-guide-template` | React Native layout/Flexbox work, screens with complex layout |
-| `visual-markers` | Visual Audit — adding debug border markers and reading screenshots against a design |
-| `system-optimization` | After a task needed more than one round of fixes — capture lessons learned |
-| `api-design` | Designing or reviewing REST API contracts (resource naming, status codes, pagination, versioning) |
-| `archify` | Producing architecture / workflow / sequence / state diagrams as standalone HTML |
-| `render-html-guide` | Using `react-native-render-html` with custom (Kanit) fonts |
-| `scroll-bottom-safe-area` | Screens with `ScrollView` that need a safe-area spacer at the bottom |
-| `baseline-ui` | Building/reviewing Tailwind UI components — animation durations, typography scale, layout anti-patterns |
-| `fixing-accessibility` | Adding interactive controls/forms/dialogs — ARIA, keyboard nav, focus, contrast |
-| `fixing-motion-performance` | Animations stutter or jank — layout thrashing, compositor properties, scroll-linked motion |
+`SessionStart` hook ฉีดกฎ 3 ข้อเข้าทุก session อัตโนมัติ:
 
-### Always-on (no invocation needed)
+1. **Simple Code** — KISS, diff แคบ, ห้าม over-engineer (ไม่มี abstraction/factory สำหรับโค้ดใช้ครั้งเดียว, ไม่ refactor ไฟล์ที่ไม่เกี่ยว)
+2. **No Bulk Delete of Working Files** — ห้ามลบไฟล์ที่กำลังแก้อยู่เป็นชุดๆ โดยไม่มีรายการชัดเจนจาก user
+3. **Jira/Issue Card Read Gate** — ถ้ามีลิงก์การ์ด/issue แต่อ่านไม่ได้จริง ให้หยุดถามก่อน ห้ามเดา requirement ต่อ
 
-A `SessionStart` hook injects three safety/discipline rules into every session automatically:
-
-- **Simple Code** — KISS, narrow diffs, no speculative abstraction
-- **No Bulk Delete of Working Files** — never bulk-delete files you're actively editing without an explicit, specific list from the user
-- **Jira/Issue Card Read Gate** — if a card/issue is linked but can't actually be read, stop and ask rather than guessing at requirements
-
-Full text: [`hooks/always-on-rules.md`](hooks/always-on-rules.md)
+ข้อความเต็ม: [`hooks/always-on-rules.md`](hooks/always-on-rules.md)
 
 ---
 
-## For local development
+## 🛠️ สำหรับพัฒนา plugin นี้เอง (local)
 
-To edit this plugin and test changes against a local checkout before publishing:
+ทดสอบการแก้ไขกับ checkout ในเครื่องก่อน publish:
 
 ```
 /plugin marketplace add /path/to/my-cursor-rules
 /plugin install my-claude-rules
 ```
 
-## Explicitly out of scope
+## 🚫 นอกขอบเขต
 
-- SonarQube-related rules/skills and `work-summary-output-format` were dropped during the Cursor → Claude Code migration — not part of this plugin
-- Cursor support (`.cursor/`, `.mdc` rules, `setup-cursor.sh`) has been retired from this repo
+- กฎ/สกิลเกี่ยวกับ SonarQube และ `work-summary-output-format` ถูกตัดออกตอน migrate จาก Cursor → Claude Code
+- การรองรับ Cursor (`.cursor/`, `.mdc` rules, `setup-cursor.sh`) ถูก retire จาก repo นี้แล้ว
 
-See [`docs/superpowers/specs/2026-07-05-claude-code-plugin-migration-design.md`](docs/superpowers/specs/2026-07-05-claude-code-plugin-migration-design.md) for the full migration design.
+รายละเอียดการ migrate: [`docs/superpowers/specs/2026-07-05-claude-code-plugin-migration-design.md`](docs/superpowers/specs/2026-07-05-claude-code-plugin-migration-design.md)
