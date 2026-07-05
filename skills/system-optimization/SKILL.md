@@ -1,3 +1,8 @@
+---
+name: system-optimization
+description: บันทึกบทเรียน (lessons learned) หลังงานที่มีการแก้ไขมากกว่า 1 รอบ (Refinement) เพื่อป้องกันความผิดพลาดซ้ำ ใช้เมื่อจบงานที่มี rework หรือ user ขอบันทึกบทเรียน
+---
+
 # System Optimization — The Teacher
 
 > **วัตถุประสงค์:** บันทึกบทเรียนจากงานที่มี Refinement เพื่อป้องกันความผิดพลาดซ้ำ  

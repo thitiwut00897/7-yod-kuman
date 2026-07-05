@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "my-claude-rules",
+  "description": "Self-hosted marketplace for the my-claude-rules Claude Code plugin.",
+  "owner": {
+    "name": "Thitiwut",
+    "url": "https://github.com/thitiwut00897"
+  },
+  "plugins": [
+    {
+      "name": "my-claude-rules",
+      "source": {
+        "source": "github",
+        "repo": "thitiwut00897/my-cursor-rules"
+      },
+      "description": "Personal dev-workflow kit for Claude Code: PO/Tester/Senior/Refactor agent methodology (opt-in), coding-discipline safety hooks, and reusable skills for UI, clean code, API design, and accessibility.",
+      "homepage": "https://github.com/thitiwut00897/my-cursor-rules",
+      "keywords": ["agents", "skills", "workflow", "code-review", "ui", "accessibility"]
+    }
+  ]
+}

@@ -1,3 +1,8 @@
+---
+name: scroll-bottom-safe-area
+description: Pattern การใส่ spacer ท้าย ScrollView ด้วย ScrollBottomSpacer เพื่อไม่ให้เนื้อหาถูก Android navigation bar หรือ iOS home indicator บัง ใช้เมื่อสร้าง/แก้หน้าจอ React Native ที่มี ScrollView หรือเนื้อหา scroll ได้
+---
+
 # Scroll Bottom Safe Area — Template สำหรับ Agent
 
 > **ใช้เมื่อ:** สร้าง/แก้หน้าจอที่มี `ScrollView` หรือเนื้อหา scroll ได้ และต้องไม่ให้ content ด้านล่างถูก **Android navigation bar โปร่งแสง** หรือ **iOS home indicator** บัง  

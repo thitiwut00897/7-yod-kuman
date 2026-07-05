@@ -1,4 +1,9 @@
-# UI Guide template project TT — เทคนิค Layout และจุดที่ AI มักพลาดใน React Native
+---
+name: ui-guide-template
+description: เทคนิค Layout, Flexbox, และจุดที่ AI มักพลาดเมื่อเขียน UI ด้วย React Native ใช้เมื่อสร้างหรือแก้ไขหน้าจอ/component ที่มี layout ซับซ้อน
+---
+
+# UI Guide — เทคนิค Layout และจุดที่ AI มักพลาดใน React Native
 
 > **วัตถุประสงค์:** Knowledge base สำหรับ @senior-full-stack-agent และ @po-agent  
 > **อัพเดทล่าสุด:** เมษายน 2026

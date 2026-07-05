@@ -1,3 +1,8 @@
+---
+name: visual-markers
+description: มาตรฐานการเพิ่ม/ลบ Visual Markers (สีขอบ debug) และวิธีอ่าน Screenshot เพื่อตรวจ Layout เทียบกับ Design ใช้เมื่อทำ Visual Audit หรือ debug ปัญหา UI/Layout ที่มองไม่เห็นจาก code อย่างเดียว
+---
+
 # Debug Flow UI — Visual Markers & Screenshot Workflow
 
 > **วัตถุประสงค์:** มาตรฐานการใช้ Visual Markers และการอ่าน Screenshot สำหรับทุก Agent  

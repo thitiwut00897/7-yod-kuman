@@ -1,3 +1,8 @@
+---
+name: codeing-guide
+description: มาตรฐานการตั้งชื่อตัวแปร/ฟังก์ชัน และการจัดการ State (Redux/hooks) สำหรับโปรเจกต์ React Native ใช้เมื่อเขียนหรือรีวิว logic, state management, หรือ naming convention
+---
+
 # Codeing Guide — มาตรฐานการจัดการ State และการตั้งชื่อตัวแปร
 
 > **วัตถุประสงค์:** Knowledge base สำหรับ @senior-full-stack-agent และ @po-agent  

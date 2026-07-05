@@ -1,3 +1,8 @@
+---
+name: clean-code
+description: มาตรฐานการเขียนโค้ดแบบ Clean & Modular Architecture สำหรับ React Native — file size limits, การแยก Container/hooks/Section ใช้เมื่อสร้าง/แก้ไข Container, Component, Hook หรือไฟล์ยาวเกิน 300 บรรทัด
+---
+
 # Clean Code & Modular Architecture Guide
 
 > **วัตถุประสงค์:** มาตรฐานการเขียน code ที่ clean และ modular สำหรับ Well Life TTIB  
