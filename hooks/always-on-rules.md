@@ -1,4 +1,4 @@
-# Always-on safety & discipline rules (my-claude-rules)
+# Always-on safety & discipline rules (7-yod-kuman)
 
 เนื้อหานี้ inject เข้าทุก session อัตโนมัติผ่าน SessionStart hook — ไม่ต้องเรียกด้วย skill หรือ agent
 

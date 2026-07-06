@@ -2,7 +2,7 @@
 description: Scaffold docs/codebase-docs/project-blueprint.md + AI-GUIDE.md ในโปรเจกต์นี้ และผูก reference ไว้ใน CLAUDE.md — รันครั้งเดียวต่อโปรเจกต์
 ---
 
-Scaffold เอกสารโครงสร้างโปรเจกต์สำหรับ my-claude-rules ในโปรเจกต์ปัจจุบัน (path ที่รันคำสั่งนี้อยู่ ไม่ใช่ตัว plugin เอง):
+Scaffold เอกสารโครงสร้างโปรเจกต์สำหรับ 7-yod-kuman ในโปรเจกต์ปัจจุบัน (path ที่รันคำสั่งนี้อยู่ ไม่ใช่ตัว plugin เอง):
 
 1. **สร้าง `docs/codebase-docs/` ถ้ายังไม่มี**
 
