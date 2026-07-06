@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "atlassian-jira": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcparmory-atlassian-jira"
+      ]
+    }
+  }
+}
