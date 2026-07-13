@@ -25,10 +25,11 @@ argument-hint: [auto (รันทุก task) หรือเว้นว่า
 4. `@tester-agent` เขียน test ฝั่ง frontend/integration ของ task เดียวกัน
 5. `@senior-full-stack-agent` implement frontend ตามรูปอ้างอิงจากข้อ 1 + integrate กับ backend จริง (GREEN) — ห้ามเดา icon ที่ไม่มี asset จริงในรูป ต้องขอจาก user
 6. UI check เทียบผลลัพธ์ที่ implement จริงกับรูปอ้างอิงจากข้อ 1 — เครื่องมือขึ้นกับ stack ของโปรเจกต์ (ดูรายละเอียดหัวข้อ "ขั้นที่ 6" ด้านล่าง)
-7. รัน full test suite (regression) + build/compile check ตาม project-blueprint.md § 6
-8. Commit เข้า feature branch — commit message อ้างชื่อ/key การ์ด Jira ถ้ามี
-9. ถ้ามีการ์ด Jira: mark subtask ของ task นี้เป็น Done ใน Jira + อัปเดต status การ์ดหลัก (เช่น → In Progress ถ้าเป็น task แรก)
-10. Mark task เป็น complete ใน tasks/todo.md
+7. ถ้า task นี้เช็ค UI ด้วย sim-use (Mobile) และผ่าน confirm ในข้อ 6 แล้ว — บันทึก sim-use script ไว้ใช้ซ้ำ (ดูรายละเอียดหัวข้อ "ขั้นที่ 7" ด้านล่าง)
+8. รัน full test suite (regression) + build/compile check ตาม project-blueprint.md § 6
+9. Commit เข้า feature branch — commit message อ้างชื่อ/key การ์ด Jira ถ้ามี
+10. ถ้ามีการ์ด Jira: mark subtask ของ task นี้เป็น Done ใน Jira + อัปเดต status การ์ดหลัก (เช่น → In Progress ถ้าเป็น task แรก)
+11. Mark task เป็น complete ใน tasks/todo.md
 ```
 
 ### ขั้นที่ 1 — ขอรูปอ้างอิง UI ก่อนเริ่ม task
@@ -81,6 +82,17 @@ argument-hint: [auto (รันทุก task) หรือเว้นว่า
 Screenshot: [path]
 → [ไปขั้นถัดไป / กลับไปแก้ frontend รอบ N+1 / ครบ 3 รอบแล้ว รอ user ตัดสินใจ]
 ```
+
+### ขั้นที่ 7 — บันทึก sim-use script ไว้ใช้ซ้ำ (เฉพาะ Mobile)
+
+หลัง UI check ในขั้นที่ 6 ผ่าน confirm แล้ว และ task นี้เช็คด้วย `sim-use` (ไม่เกี่ยวกับ web/webapp-testing) — เก็บคำสั่ง sim-use **ทั้งหมด** ที่ใช้ตลอด task นี้ (ทุกหน้า/ทุก state ที่ task สร้างหรือแก้ไข ไม่ใช่แค่ลำดับ verify รอบสุดท้าย) ไว้เป็น script เพื่อ replay ทีหลังโดยไม่ต้อง `sim-use ui` สำรวจใหม่ทุกครั้ง:
+
+1. หา `{feature-name}` จากชื่อ feature branch ของ plan นี้ (ส่วน `{short-name}` ใน `feature/{JIRA-KEY}/{short-name}` หรือ `feature/{short-name}`)
+2. หา `{page-name}` จากชื่อหน้า/สกรีนที่ task นี้ทดสอบ — ถ้า task เดียวเกี่ยวกับหลายหน้า ให้แยก script ต่อหน้า
+3. เขียน shell script ไว้ที่ `feature/{feature-name}/{page-name}/sim-use.sh` ต่อหน้า — รวมคำสั่ง `sim-use` ตามลำดับจริงที่ใช้ตลอด task (เปิดแอป → นำทางไปหน้านี้ → ทุก action ที่ทำ → `sim-use ui`/`screenshot` ตอน verify) โดยใช้ `--device <UDID>` เดียวกับที่ใช้ตอนเช็ค
+4. ถ้ามี `sim-use.sh` ของหน้าเดียวกันอยู่แล้ว (task ก่อนหน้าของ feature นี้เคยเช็คหน้านี้) ให้ต่อ/แก้ไข script เดิม ไม่สร้างไฟล์ใหม่ซ้ำ
+5. **เมื่อกลับมาแก้ task/หน้าเดิมทีหลัง** (bug fix, revisit, เปลี่ยน flow) — ถ้าลำดับ sim-use ที่ใช้เช็คจริงต่างจาก `sim-use.sh` เดิม ต้อง update ไฟล์นั้นให้ตรงกับ flow ปัจจุบันทันที ห้ามปล่อย script เก่าที่ไม่ตรงกับพฤติกรรมจริงทิ้งไว้
+6. ไฟล์นี้เป็น script สำหรับใช้งานจริง (ไม่ใช่ artifact ของ AI workflow อย่าง SPEC.md/tasks/) — commit เข้า feature branch ได้ตามปกติ
 
 ## Mode: default (ไม่มี argument)
 
