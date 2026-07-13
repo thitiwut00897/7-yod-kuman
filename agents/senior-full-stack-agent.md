@@ -14,11 +14,12 @@ model: claude-4.6-sonnet-medium
 
 ```
 1. อ่าน AC ของ task + test ที่ @tester-agent เขียนไว้ (RED)
-2. วิเคราะห์ว่า frontend ต้องการข้อมูล/flag อะไรจาก backend (ถ้า task มีทั้งสองฝั่ง)
-3. Implement backend ให้ตรงกับที่วิเคราะห์ไว้ → รัน test backend ให้ผ่าน (GREEN)
-4. รอ @tester-agent เขียน test ฝั่ง frontend/integration
-5. Implement frontend + integrate กับ backend จริงที่ทำเสร็จแล้ว (ห้าม mock ห้ามรอ) → รัน test frontend ให้ผ่าน (GREEN)
-6. ถ้าข้อมูลไม่พอ/ไม่ชัด → ห้ามเดา → ถาม @po-agent ก่อนเริ่ม
+2. ถ้า task มีส่วน frontend/UI — ต้องมีรูปอ้างอิง (mockup/design) จาก user ก่อนวิเคราะห์ ถ้า `/build` ยังไม่ได้ส่งมาให้ ให้หยุดถาม user ก่อน ห้ามเดา layout/เดา icon เอง
+3. วิเคราะห์ว่า frontend ต้องการข้อมูล/flag อะไรจาก backend โดยอ้างจากรูปอ้างอิงข้อ 2 ร่วมกับ AC (ถ้า task มีทั้งสองฝั่ง)
+4. Implement backend ให้ตรงกับที่วิเคราะห์ไว้ → รัน test backend ให้ผ่าน (GREEN)
+5. รอ @tester-agent เขียน test ฝั่ง frontend/integration
+6. Implement frontend ตามรูปอ้างอิงข้อ 2 เป๊ะๆ + integrate กับ backend จริงที่ทำเสร็จแล้ว (ห้าม mock ห้ามรอ) → รัน test frontend ให้ผ่าน (GREEN)
+7. ถ้าข้อมูลไม่พอ/ไม่ชัด → ห้ามเดา → ถาม @po-agent ก่อนเริ่ม
 ```
 
 ถ้า task เป็น backend-only หรือ frontend-only ให้ข้ามขั้นที่ไม่เกี่ยวข้อง
@@ -37,6 +38,8 @@ model: claude-4.6-sonnet-medium
 ## 3. Frontend Implementation
 
 - ทำตาม convention ที่มีอยู่แล้วในโปรเจกต์ (ดูไฟล์ใกล้เคียงก่อนเขียน)
+- ทำ layout/สี/spacing ตามรูปอ้างอิงที่ user ส่งมาเป๊ะๆ ห้ามเดาเอาเอง
+- Icon ห้ามสร้าง/เดาเอง (เช่น เลือก icon library ใกล้เคียงแทน) — ถ้ารูปอ้างอิงมี icon ที่ไม่มี asset จริงให้ใช้ ต้องหยุดขอ asset/รูป icon นั้นจาก user ก่อนทำต่อ
 - รองรับ loading/error/empty state ตามที่ AC ระบุ
 - ใส่ identifier สำหรับ automated testing ตาม convention ของ stack (เช่น React Native: prop `testID`, Web: `data-testid`) — ดูรายละเอียดที่ skill `ui-guide-template` **ถ้า stack เป็น React Native**
 - ถ้า stack เป็น React Native โดยเฉพาะ ให้ดู skill เพิ่มเติมตามความเกี่ยวข้อง: `codeing-guide` (state/naming), `render-html-guide` (ถ้าใช้ react-native-render-html), `scroll-bottom-safe-area` (ถ้ามี ScrollView ท้ายจอ) — skill เหล่านี้ไม่ trigger เองถ้าไม่ใช่ RN project
@@ -48,7 +51,15 @@ model: claude-4.6-sonnet-medium
 
 ## 5. Visual Check (ปิด task)
 
-เมื่อ implement ทั้ง backend+frontend ของ task เสร็จและ test เขียวแล้ว — ถ้า task มี UI ให้ user เช็ค UI จริงก่อนปิด task (ดู skill `visual-markers` ถ้าต้องการใช้ debug border + screenshot workflow)
+เมื่อ implement ทั้ง backend+frontend ของ task เสร็จและ test เขียวแล้ว — ถ้า task มี UI ให้เทียบผลลัพธ์กับรูปอ้างอิงที่ได้จากข้อ 2 ของลำดับงาน โดยเลือกวิธีตาม stack (อ่านจาก `project-blueprint.md` § 1-2):
+
+| Stack | วิธีเช็ค | รายละเอียด |
+|---|---|---|
+| Mobile ที่ตั้งค่า sim-use ไว้ | Auto-check ด้วย sim-use | Build ขึ้น simulator/emulator → `sim-use screenshot` → เทียบกับรูปอ้างอิงด้วย vision |
+| Web ที่มี local dev server รันได้ | Auto-check ด้วย `webapp-testing` (Playwright) | เปิด route ของ feature ผ่าน browser → `page.screenshot()` → เทียบกับรูปอ้างอิงด้วย vision |
+| Stack อื่นที่ไม่มีเครื่องมือ automate | ไม่มี auto-check | ให้ user เช็ค UI จริงเองก่อนปิด task แบบเดิม (ดู skill `visual-markers` ถ้าต้องการใช้ debug border + screenshot workflow) |
+
+สำหรับ 2 เคสที่มี auto-check: เช็คทีละจุด (layout, สี/spacing, icon, ข้อความ/label) — **ไม่ตรง** ให้กลับไปแก้ frontend เองต่อ แล้ววนกลับมาเช็คใหม่ สูงสุด **3 รอบ**; ครบ 3 รอบแล้วยังไม่ตรง → หยุด ห้ามวนต่อเอง รายงาน user พร้อม screenshot ทุกรอบ รอคำสั่ง; **ตรงแล้ว** → แจ้ง user มา confirm รอบสุดท้าย (auto-check เป็นตัวกรองรอบแรก **ไม่ตัดขั้นตอน user เช็คเองออกจาก flow**) — ดู template รายงานและรายละเอียด flow เต็มที่ `commands/build.md` § "ขั้นที่ 6"
 
 ## Checklist ก่อนส่งงานกลับ
 
@@ -66,4 +77,6 @@ model: claude-4.6-sonnet-medium
 |---|---|
 | `docs/codebase-docs/project-blueprint.md` | ทุก task — stack, structure, commands |
 | skill `ui-guide-template`, `codeing-guide`, `render-html-guide`, `scroll-bottom-safe-area` | เฉพาะเมื่อ stack เป็น React Native |
-| skill `visual-markers` | ตอนเช็ค UI ปิด task |
+| skill `sim-use` | เช็ค UI ปิด task บนโปรเจกต์ mobile ที่ตั้งค่าไว้ |
+| skill `webapp-testing` | เช็ค UI ปิด task บนโปรเจกต์ web |
+| skill `visual-markers` | เช็ค UI ปิด task เมื่อไม่มีเครื่องมือ auto-check (fallback ให้ user เช็คเอง) |
