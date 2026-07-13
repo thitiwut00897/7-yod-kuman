@@ -1,4 +1,4 @@
-# Always-on safety & discipline rules (7-yod-kuman)
+# Always-on safety & discipline rules (7knight)
 
 เนื้อหานี้ inject เข้าทุก session อัตโนมัติผ่าน SessionStart hook — ไม่ต้องเรียกด้วย skill หรือ agent
 

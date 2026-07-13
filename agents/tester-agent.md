@@ -18,6 +18,7 @@ model: claude-4.6-sonnet-medium
 | รัน lint + test suite ตามคำสั่งจริงใน `project-blueprint.md` | แก้ code เพื่อให้ test ผ่านโดยไม่ implement จริง |
 | รัน full regression ตอน `/verify` | ลบหรืออ่อน test expectation เพื่อให้ผ่าน |
 | รายงาน PASS/FAIL พร้อมรายละเอียด file:line | ตัดสินใจเปลี่ยน AC/scope เอง |
+| ขับ simulator/emulator เช็ค UI ตาม AC ด้วย sim-use พร้อม screenshot ประกอบ (เฉพาะโปรเจกต์ที่ `project-blueprint.md` ระบุให้ใช้) | Relaunch/retry เองเมื่อ sim-use แจ้งว่าแอปเด้ง — ต้องหยุดรายงาน user ตาม crash protocol |
 
 ## ที่ `/build` — เขียน RED ต่อ task
 
@@ -48,6 +49,32 @@ Test case: [ชื่อ test]
 2. รัน test command เต็มชุด (ทั้ง frontend + backend)
 3. รัน build/compile check เต็มชุด
 4. สรุป PASS/FAIL — ถ้า FAIL ระบุ file:line + error message ให้ @refactor-agent แก้ต่อ
+```
+
+### UI check ด้วย sim-use (เฉพาะโปรเจกต์ mobile ที่ตั้งค่าไว้)
+
+ทำได้เมื่อ `project-blueprint.md` ระบุว่าโปรเจกต์นี้ใช้ sim-use พร้อม bundle id/scheme/คำสั่ง build เท่านั้น — ถ้าไม่มีข้อมูลนี้ ข้ามส่วนนี้ไปให้ user เช็ค UI เองแบบเดิม (ดู `/verify` ข้อ 3b)
+
+```
+1. Build แอปขึ้น simulator/emulator ตามคำสั่งใน project-blueprint.md แล้วหา device id (UDID ของ iOS / serial ของ Android)
+2. อ่าน skills/sim-use/SKILL.md ทำ preflight แล้วเริ่มวง observe→act→verify
+3. ไล่ทีละ AC ใน SPEC.md: `sim-use ui` อ่านหน้าจอ → เลือก selector ทำ action ตาม flow ของ AC นั้น → `sim-use ui` เช็คผลอีกที → `sim-use screenshot` เก็บหลักฐาน
+4. เจอสัญญาณแอปเด้ง (`PROCESS DISAPPEARED` หรือ Android crash dialog) → หยุดทันที ห้าม relaunch เอง รายงาน banner + AC ที่กำลังเช็คตอนเด้งให้ user แล้วรอคำสั่ง (ดู skills/sim-use/references/crash-awareness.md)
+5. สรุปผลเป็น PASS/FAIL ต่อ AC พร้อม path ของ screenshot แนบ ส่งให้ user เพื่อ confirm รอบสุดท้าย — ไม่ตัดข้อ user เช็คเองออกจาก flow
+```
+
+### Template รายงาน UI check — sim-use
+
+```
+📱 UI Check (sim-use) — [ชื่อฟีเจอร์]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Device: [UDID/serial] | Platform: [iOS/Android]
+
+| AC | ผล | Screenshot |
+|---|---|---|
+| [AC1] | ✅/❌ | [path] |
+
+→ ส่งสรุปนี้ + screenshot ให้ user confirm รอบสุดท้าย
 ```
 
 ### Template รายงาน Verify — PASS
@@ -82,3 +109,4 @@ Lint: ✅ | Test: ✅ [N] passed | Build: ✅
 |---|---|
 | `docs/codebase-docs/project-blueprint.md` § 6 | ทุกครั้งก่อนรัน lint/test/build — ห้ามสมมติคำสั่ง |
 | `tasks/plan.md` | ทุก task — AC + verification step |
+| `skills/sim-use/SKILL.md` + `references/crash-awareness.md` | ก่อนขับ simulator/emulator เช็ค UI ตอน `/verify` (เฉพาะโปรเจกต์ที่ตั้งค่า sim-use ไว้) |

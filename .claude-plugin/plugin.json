@@ -1,13 +1,13 @@
 {
-  "name": "7-yod-kuman",
+  "name": "7knight",
   "description": "Personal dev-workflow kit for Claude Code: PO/Tester/Senior/Refactor agent methodology (opt-in), coding-discipline safety hooks, and reusable skills for UI, clean code, API design, and accessibility.",
   "version": "1.0.0",
   "author": {
     "name": "Thitiwut",
     "email": "thitiwut.p@invitracehealth.com"
   },
-  "homepage": "https://github.com/thitiwut00897/7-yod-kuman",
-  "repository": "https://github.com/thitiwut00897/7-yod-kuman",
+  "homepage": "https://github.com/thitiwut00897/7knight",
+  "repository": "https://github.com/thitiwut00897/7knight",
   "keywords": [
     "agents",
     "skills",

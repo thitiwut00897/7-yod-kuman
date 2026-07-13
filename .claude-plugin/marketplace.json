@@ -1,20 +1,20 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
-  "name": "7-yod-kuman",
-  "description": "Self-hosted marketplace for the 7-yod-kuman Claude Code plugin.",
+  "name": "7knight",
+  "description": "Self-hosted marketplace for the 7knight Claude Code plugin.",
   "owner": {
     "name": "Thitiwut",
     "url": "https://github.com/thitiwut00897"
   },
   "plugins": [
     {
-      "name": "7-yod-kuman",
+      "name": "7knight",
       "source": {
         "source": "github",
-        "repo": "thitiwut00897/7-yod-kuman"
+        "repo": "thitiwut00897/7knight"
       },
       "description": "Personal dev-workflow kit for Claude Code: PO/Tester/Senior/Refactor agent methodology (opt-in), coding-discipline safety hooks, and reusable skills for UI, clean code, API design, and accessibility.",
-      "homepage": "https://github.com/thitiwut00897/7-yod-kuman",
+      "homepage": "https://github.com/thitiwut00897/7knight",
       "keywords": ["agents", "skills", "workflow", "code-review", "ui", "accessibility"]
     }
   ]
