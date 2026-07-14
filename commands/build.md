@@ -25,11 +25,10 @@ argument-hint: [auto (รันทุก task) หรือเว้นว่า
 4. `@tester-agent` เขียน test ฝั่ง frontend/integration ของ task เดียวกัน
 5. `@senior-full-stack-agent` implement frontend ตามรูปอ้างอิงจากข้อ 1 + integrate กับ backend จริง (GREEN) — ห้ามเดา icon ที่ไม่มี asset จริงในรูป ต้องขอจาก user
 6. UI check เทียบผลลัพธ์ที่ implement จริงกับรูปอ้างอิงจากข้อ 1 — เครื่องมือขึ้นกับ stack ของโปรเจกต์ (ดูรายละเอียดหัวข้อ "ขั้นที่ 6" ด้านล่าง)
-7. ถ้า task นี้เช็ค UI ด้วย sim-use (Mobile) และผ่าน confirm ในข้อ 6 แล้ว — บันทึก sim-use script ไว้ใช้ซ้ำ (ดูรายละเอียดหัวข้อ "ขั้นที่ 7" ด้านล่าง)
-8. รัน full test suite (regression) + build/compile check ตาม project-blueprint.md § 6
-9. Commit เข้า feature branch — commit message อ้างชื่อ/key การ์ด Jira ถ้ามี
-10. ถ้ามีการ์ด Jira: mark subtask ของ task นี้เป็น Done ใน Jira + อัปเดต status การ์ดหลัก (เช่น → In Progress ถ้าเป็น task แรก)
-11. Mark task เป็น complete ใน tasks/todo.md
+7. รัน full test suite (regression) + build/compile check ตาม project-blueprint.md § 6
+8. Commit เข้า feature branch — commit message อ้างชื่อ/key การ์ด Jira ถ้ามี
+9. ถ้ามีการ์ด Jira: mark subtask ของ task นี้เป็น Done ใน Jira + อัปเดต status การ์ดหลัก (เช่น → In Progress ถ้าเป็น task แรก)
+10. Mark task เป็น complete ใน tasks/todo.md
 ```
 
 ### ขั้นที่ 1 — ขอรูปอ้างอิง UI ก่อนเริ่ม task
@@ -45,19 +44,26 @@ argument-hint: [auto (รันทุก task) หรือเว้นว่า
 
 | Stack | เครื่องมือ auto-check | เงื่อนไขที่ใช้ได้ |
 |---|---|---|
-| Mobile (React Native / iOS / Android) | `sim-use` ขับ simulator/emulator | `project-blueprint.md` ต้องระบุ bundle id/scheme/คำสั่ง build ไว้ |
 | Web | `webapp-testing` (Playwright) ขับ browser | ต้อง run local dev server ได้ (คำสั่ง start ดูจาก `project-blueprint.md` § 6) |
-| Stack อื่นที่ไม่มีเครื่องมือ automate UI | ไม่มี auto-check | ให้ user เช็ค UI จริงเองก่อนปิด task แบบเดิม (ข้ามลูปด้านล่างทั้งหมด) |
+| iOS | `ios-simulator-skill` ขับ iOS Simulator | ต้อง build app ขึ้น Simulator ได้ (`xcodebuild`/scheme จาก `project-blueprint.md` § 6) |
+| Stack อื่นที่ไม่มีเครื่องมือ automate UI (เช่น Android — ดู regression test ที่ `/regression-sim-use` แทน) | ไม่มี auto-check | ให้ user เช็ค UI จริงเองก่อนปิด task แบบเดิม (ข้ามลูปด้านล่างทั้งหมด) |
 
-ขั้นตอนย่อยของ auto-check (ทำแบบเดียวกันไม่ว่า mobile หรือ web ต่างกันแค่เครื่องมือ):
+ขั้นตอนย่อยของ auto-check (Web):
 
 ```
-1. เปิดของจริงที่เพิ่ง implement ขึ้นมา
-   - Mobile: build แอปขึ้น simulator/emulator ตามคำสั่งใน project-blueprint.md แล้วหา device id (UDID/serial)
-   - Web: start dev server (ถ้ายังไม่รัน) แล้วเปิด browser ไปที่ route ของ feature นี้ผ่าน webapp-testing
-2. ถ่าย screenshot ของหน้า/จอที่เพิ่งทำ
-   - Mobile: `sim-use screenshot --device <UDID>`
-   - Web: `page.screenshot()` ผ่าน webapp-testing
+1. เปิดของจริงที่เพิ่ง implement ขึ้นมา — start dev server (ถ้ายังไม่รัน) แล้วเปิด browser ไปที่ route ของ feature นี้ผ่าน webapp-testing
+2. ถ่าย screenshot ของหน้า/จอที่เพิ่งทำด้วย `page.screenshot()` ผ่าน webapp-testing
+3. เทียบ screenshot ที่ได้กับรูปอ้างอิงจากขั้นที่ 1 ด้วย vision — เช็คทีละจุด: layout/โครงหน้าจอ, สี, spacing, icon, ข้อความ/label
+4. ไม่ตรง → กลับไปแก้ frontend ต่อ (ขั้นตอนหลักข้อ 5) แล้ววนกลับมาทำขั้นนี้ใหม่ตั้งแต่ต้น — วนได้สูงสุด 3 รอบ
+5. วนครบ 3 รอบแล้วยังไม่ตรง → หยุดทันที ห้ามวนต่อเอง รายงาน user ว่าแก้ไปกี่รอบ ต่างจากรูปตรงจุดไหนบ้างในแต่ละรอบ (พร้อม screenshot ทุกรอบ) รอ user ตัดสินใจว่าจะแก้ต่อหรือรับ diff ที่เหลือ
+6. ตรงแล้ว (ครบทุกจุดที่เช็คในขั้น 3) → แจ้ง user มา confirm รอบสุดท้าย — **ไม่ตัดขั้นตอน user เช็คเองออกจาก flow** auto-check เป็นตัวกรองรอบแรกให้ ไม่ใช่ตัวแทน user
+```
+
+ขั้นตอนย่อยของ auto-check (iOS):
+
+```
+1. Build app ล่าสุดขึ้น Simulator (`build_and_test.py`) แล้ว launch ไปที่หน้า/จอของ feature นี้ (`app_launcher.py --launch <bundle-id>`, นำทางด้วย `navigator.py --find-text/--find-id --tap` ถ้าต้องกดผ่านหลายหน้าจอ)
+2. ถ่าย screenshot ของหน้าจอปัจจุบันด้วย `app_state_capture.py --app-bundle-id <bundle-id>` (ios-simulator-skill)
 3. เทียบ screenshot ที่ได้กับรูปอ้างอิงจากขั้นที่ 1 ด้วย vision — เช็คทีละจุด: layout/โครงหน้าจอ, สี, spacing, icon, ข้อความ/label
 4. ไม่ตรง → กลับไปแก้ frontend ต่อ (ขั้นตอนหลักข้อ 5) แล้ววนกลับมาทำขั้นนี้ใหม่ตั้งแต่ต้น — วนได้สูงสุด 3 รอบ
 5. วนครบ 3 รอบแล้วยังไม่ตรง → หยุดทันที ห้ามวนต่อเอง รายงาน user ว่าแก้ไปกี่รอบ ต่างจากรูปตรงจุดไหนบ้างในแต่ละรอบ (พร้อม screenshot ทุกรอบ) รอ user ตัดสินใจว่าจะแก้ต่อหรือรับ diff ที่เหลือ
@@ -69,7 +75,7 @@ argument-hint: [auto (รันทุก task) หรือเว้นว่า
 ```
 🖼️ UI Check — [ชื่อ task]
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-เครื่องมือ: sim-use (mobile) / webapp-testing (web) / ไม่มี (user เช็คเอง)
+เครื่องมือ: webapp-testing (web) / ios-simulator-skill (iOS) / ไม่มี (user เช็คเอง)
 รอบที่: [N]/3
 
 | จุดที่เทียบ | ตรงกับรูปอ้างอิงไหม | หมายเหตุ |
@@ -82,17 +88,6 @@ argument-hint: [auto (รันทุก task) หรือเว้นว่า
 Screenshot: [path]
 → [ไปขั้นถัดไป / กลับไปแก้ frontend รอบ N+1 / ครบ 3 รอบแล้ว รอ user ตัดสินใจ]
 ```
-
-### ขั้นที่ 7 — บันทึก sim-use script ไว้ใช้ซ้ำ (เฉพาะ Mobile)
-
-หลัง UI check ในขั้นที่ 6 ผ่าน confirm แล้ว และ task นี้เช็คด้วย `sim-use` (ไม่เกี่ยวกับ web/webapp-testing) — เก็บคำสั่ง sim-use **ทั้งหมด** ที่ใช้ตลอด task นี้ (ทุกหน้า/ทุก state ที่ task สร้างหรือแก้ไข ไม่ใช่แค่ลำดับ verify รอบสุดท้าย) ไว้เป็น script เพื่อ replay ทีหลังโดยไม่ต้อง `sim-use ui` สำรวจใหม่ทุกครั้ง:
-
-1. หา `{feature-name}` จากชื่อ feature branch ของ plan นี้ (ส่วน `{short-name}` ใน `feature/{JIRA-KEY}/{short-name}` หรือ `feature/{short-name}`)
-2. หา `{page-name}` จากชื่อหน้า/สกรีนที่ task นี้ทดสอบ — ถ้า task เดียวเกี่ยวกับหลายหน้า ให้แยก script ต่อหน้า
-3. เขียน shell script ไว้ที่ `feature/{feature-name}/{page-name}/sim-use.sh` ต่อหน้า — รวมคำสั่ง `sim-use` ตามลำดับจริงที่ใช้ตลอด task (เปิดแอป → นำทางไปหน้านี้ → ทุก action ที่ทำ → `sim-use ui`/`screenshot` ตอน verify) โดยใช้ `--device <UDID>` เดียวกับที่ใช้ตอนเช็ค
-4. ถ้ามี `sim-use.sh` ของหน้าเดียวกันอยู่แล้ว (task ก่อนหน้าของ feature นี้เคยเช็คหน้านี้) ให้ต่อ/แก้ไข script เดิม ไม่สร้างไฟล์ใหม่ซ้ำ
-5. **เมื่อกลับมาแก้ task/หน้าเดิมทีหลัง** (bug fix, revisit, เปลี่ยน flow) — ถ้าลำดับ sim-use ที่ใช้เช็คจริงต่างจาก `sim-use.sh` เดิม ต้อง update ไฟล์นั้นให้ตรงกับ flow ปัจจุบันทันที ห้ามปล่อย script เก่าที่ไม่ตรงกับพฤติกรรมจริงทิ้งไว้
-6. ไฟล์นี้เป็น script สำหรับใช้งานจริง (ไม่ใช่ artifact ของ AI workflow อย่าง SPEC.md/tasks/) — commit เข้า feature branch ได้ตามปกติ
 
 ## Mode: default (ไม่มี argument)
 

@@ -55,9 +55,8 @@ model: claude-4.6-sonnet-medium
 
 | Stack | วิธีเช็ค | รายละเอียด |
 |---|---|---|
-| Mobile ที่ตั้งค่า sim-use ไว้ | Auto-check ด้วย sim-use | Build ขึ้น simulator/emulator → `sim-use screenshot` → เทียบกับรูปอ้างอิงด้วย vision |
 | Web ที่มี local dev server รันได้ | Auto-check ด้วย `webapp-testing` (Playwright) | เปิด route ของ feature ผ่าน browser → `page.screenshot()` → เทียบกับรูปอ้างอิงด้วย vision |
-| Stack อื่นที่ไม่มีเครื่องมือ automate | ไม่มี auto-check | ให้ user เช็ค UI จริงเองก่อนปิด task แบบเดิม (ดู skill `visual-markers` ถ้าต้องการใช้ debug border + screenshot workflow) |
+| Stack อื่นที่ไม่มีเครื่องมือ automate (รวม Mobile) | ไม่มี auto-check | ให้ user เช็ค UI จริงเองก่อนปิด task แบบเดิม (ดู skill `visual-markers` ถ้าต้องการใช้ debug border + screenshot workflow — โปรเจกต์ mobile ที่ต้องการ regression test ซ้ำภายหลัง ใช้ `/regression-sim-use` แยกต่างหาก) |
 
 สำหรับ 2 เคสที่มี auto-check: เช็คทีละจุด (layout, สี/spacing, icon, ข้อความ/label) — **ไม่ตรง** ให้กลับไปแก้ frontend เองต่อ แล้ววนกลับมาเช็คใหม่ สูงสุด **3 รอบ**; ครบ 3 รอบแล้วยังไม่ตรง → หยุด ห้ามวนต่อเอง รายงาน user พร้อม screenshot ทุกรอบ รอคำสั่ง; **ตรงแล้ว** → แจ้ง user มา confirm รอบสุดท้าย (auto-check เป็นตัวกรองรอบแรก **ไม่ตัดขั้นตอน user เช็คเองออกจาก flow**) — ดู template รายงานและรายละเอียด flow เต็มที่ `commands/build.md` § "ขั้นที่ 6"
 
@@ -77,6 +76,5 @@ model: claude-4.6-sonnet-medium
 |---|---|
 | `docs/codebase-docs/project-blueprint.md` | ทุก task — stack, structure, commands |
 | skill `ui-guide-template`, `codeing-guide`, `render-html-guide`, `scroll-bottom-safe-area` | เฉพาะเมื่อ stack เป็น React Native |
-| skill `sim-use` | เช็ค UI ปิด task บนโปรเจกต์ mobile ที่ตั้งค่าไว้ |
 | skill `webapp-testing` | เช็ค UI ปิด task บนโปรเจกต์ web |
 | skill `visual-markers` | เช็ค UI ปิด task เมื่อไม่มีเครื่องมือ auto-check (fallback ให้ user เช็คเอง) |
