@@ -42,7 +42,7 @@ model: claude-4.6-sonnet-medium
 - Icon ห้ามสร้าง/เดาเอง (เช่น เลือก icon library ใกล้เคียงแทน) — ถ้ารูปอ้างอิงมี icon ที่ไม่มี asset จริงให้ใช้ ต้องหยุดขอ asset/รูป icon นั้นจาก user ก่อนทำต่อ
 - รองรับ loading/error/empty state ตามที่ AC ระบุ
 - ใส่ identifier สำหรับ automated testing ตาม convention ของ stack (เช่น React Native: prop `testID`, Web: `data-testid`) — ดูรายละเอียดที่ skill `ui-guide-template` **ถ้า stack เป็น React Native**
-- ถ้า stack เป็น React Native โดยเฉพาะ ให้ดู skill เพิ่มเติมตามความเกี่ยวข้อง: `codeing-guide` (state/naming), `render-html-guide` (ถ้าใช้ react-native-render-html), `scroll-bottom-safe-area` (ถ้ามี ScrollView ท้ายจอ) — skill เหล่านี้ไม่ trigger เองถ้าไม่ใช่ RN project
+- ถ้า stack เป็น React Native โดยเฉพาะ ให้ดู skill เพิ่มเติมตามความเกี่ยวข้อง: `codeing-guide` (state/naming), `scroll-bottom-safe-area` (ถ้ามี ScrollView ท้ายจอ) — skill เหล่านี้ไม่ trigger เองถ้าไม่ใช่ RN project
 
 ## 4. Testing
 
@@ -56,7 +56,8 @@ model: claude-4.6-sonnet-medium
 | Stack | วิธีเช็ค | รายละเอียด |
 |---|---|---|
 | Web ที่มี local dev server รันได้ | Auto-check ด้วย `webapp-testing` (Playwright) | เปิด route ของ feature ผ่าน browser → `page.screenshot()` → เทียบกับรูปอ้างอิงด้วย vision |
-| Stack อื่นที่ไม่มีเครื่องมือ automate (รวม Mobile) | ไม่มี auto-check | ให้ user เช็ค UI จริงเองก่อนปิด task แบบเดิม (ดู skill `visual-markers` ถ้าต้องการใช้ debug border + screenshot workflow — โปรเจกต์ mobile ที่ต้องการ regression test ซ้ำภายหลัง ใช้ `/regression-sim-use` แยกต่างหาก) |
+| iOS | Auto-check ด้วย `ios-simulator-skill` ขับ iOS Simulator | ต้อง build app ขึ้น Simulator ได้ (`xcodebuild`/scheme จาก `project-blueprint.md` § 6) |
+| Stack อื่นที่ไม่มีเครื่องมือ automate UI (เช่น Android — ดู regression test ที่ `/regression-sim-use` แทน) | ไม่มี auto-check | ให้ user เช็ค UI จริงเองก่อนปิด task แบบเดิม (ข้ามลูปด้านล่างทั้งหมด) |
 
 สำหรับ 2 เคสที่มี auto-check: เช็คทีละจุด (layout, สี/spacing, icon, ข้อความ/label) — **ไม่ตรง** ให้กลับไปแก้ frontend เองต่อ แล้ววนกลับมาเช็คใหม่ สูงสุด **3 รอบ**; ครบ 3 รอบแล้วยังไม่ตรง → หยุด ห้ามวนต่อเอง รายงาน user พร้อม screenshot ทุกรอบ รอคำสั่ง; **ตรงแล้ว** → แจ้ง user มา confirm รอบสุดท้าย (auto-check เป็นตัวกรองรอบแรก **ไม่ตัดขั้นตอน user เช็คเองออกจาก flow**) — ดู template รายงานและรายละเอียด flow เต็มที่ `commands/build.md` § "ขั้นที่ 6"
 
@@ -75,6 +76,6 @@ model: claude-4.6-sonnet-medium
 | แหล่งข้อมูล | อ่านเมื่อ |
 |---|---|
 | `docs/codebase-docs/project-blueprint.md` | ทุก task — stack, structure, commands |
-| skill `ui-guide-template`, `codeing-guide`, `render-html-guide`, `scroll-bottom-safe-area` | เฉพาะเมื่อ stack เป็น React Native |
+| skill `ui-guide-template`, `codeing-guide`, `scroll-bottom-safe-area` | เฉพาะเมื่อ stack เป็น React Native |
 | skill `webapp-testing` | เช็ค UI ปิด task บนโปรเจกต์ web |
-| skill `visual-markers` | เช็ค UI ปิด task เมื่อไม่มีเครื่องมือ auto-check (fallback ให้ user เช็คเอง) |
+| skill `ios-simulator-skill` | เช็ค UI ปิด task บน iOS Simulator |

@@ -17,12 +17,10 @@
 
 | ประเภทงาน | อ่านอะไร |
 |---|---|
-| งาน UI / Layout | skill `ui-guide-template`, `visual-markers` |
+| งาน UI / Layout | skill `ui-guide-template` |
 | งาน Logic / State / API | skill `codeing-guide` |
 | งาน Clean Code / แยกไฟล์ | skill `clean-code` |
 | งาน API Design (backend) | skill `api-design` |
-| งาน Diagram / Architecture Doc | skill `archify` |
-| งานที่มี Refinement หลายรอบ | skill `system-optimization` (บันทึกบทเรียน) |
 | ต้องการเวิร์กโฟลว์ Test-Case Gate เต็มรูปแบบ | `/po-workflow` (เรียก `@po-agent`) |
 
 ---

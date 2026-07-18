@@ -57,16 +57,11 @@ my-claude-rules/
 │   └── refactor-agent.md           # new subagent (from rules/refactor-agent.mdc)
 ├── skills/
 │   ├── api-design/SKILL.md
-│   ├── archify/SKILL.md
 │   ├── clean-code/SKILL.md
 │   ├── codeing-guide/SKILL.md
-│   ├── render-html-guide/SKILL.md
-│   ├── system-optimization/SKILL.md
 │   ├── ui-guide-template/SKILL.md
-│   ├── visual-markers/SKILL.md         # renamed from Visual-Markers
 │   ├── scroll-bottom-safe-area/SKILL.md # renamed from Scroll-Bottom-Safe-Area
 │   ├── baseline-ui/SKILL.md            # new — folded in from ~/.claude/skills (personal)
-│   ├── fixing-accessibility/SKILL.md   # new — folded in from ~/.claude/skills (personal)
 │   └── fixing-motion-performance/SKILL.md # new — folded in from ~/.claude/skills (personal)
 ├── commands/
 │   ├── po-workflow.md               # opt-in entry point for the full PO methodology
@@ -95,7 +90,7 @@ my-claude-rules/
 | `rules/sonarqube_mcp_instructions.mdc` | Dropped | Out of scope per explicit request |
 | `rules/work-summary-output-format.mdc` | Dropped | Out of scope per explicit request |
 | `skills/*` (9 existing folders) | Ported into plugin `skills/`, two renamed to kebab-case | Consistency with naming convention |
-| `~/.claude/skills/baseline-ui`, `fixing-accessibility`, `fixing-motion-performance` | Copied into plugin `skills/` | Currently personal-machine-only files with no plugin backing them; folding in makes them travel with the plugin to any machine/project |
+| `~/.claude/skills/baseline-ui`, `fixing-motion-performance` | Copied into plugin `skills/` | Currently personal-machine-only files with no plugin backing them; folding in makes them travel with the plugin to any machine/project |
 | `~/.claude/skills/frontend-slides`, `superpowers:*` | **Not** bundled | Already their own separate plugins (frontend-slides has its own cache/marketplace entry; superpowers belongs to a third-party repo) — duplicating them would fork someone else's plugin content |
 
 Migration cleanup: several source files reference old Cursor-style paths

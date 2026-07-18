@@ -5,8 +5,7 @@ description: มาตรฐานการเขียนโค้ดแบบ 
 
 # Clean Code & Modular Architecture Guide
 
-> **วัตถุประสงค์:** มาตรฐานการเขียน code ที่ clean และ modular สำหรับ Well Life TTIB  
-> **อัพเดทล่าสุด:** เมษายน 2026  
+> **วัตถุประสงค์:** มาตรฐานการเขียน code ที่ clean และ modular สำหรับโปรเจกต์ React Native ที่ใช้ Redux + react-navigation + i18n  
 > **ใช้เมื่อ:** สร้าง/แก้ไข Container, Component, Hook, หรือเมื่อไฟล์เริ่มยาวเกิน 300 บรรทัด  
 > **ความเรียบง่าย (บังคับทุกงาน):** `.cursor/rules/simple-code.mdc` — แยกไฟล์เพื่ออ่านง่าย ไม่ใช่เพื่อสร้าง abstraction หรือโครงสร้างที่ซับซ้อนโดยไม่จำเป็น
 
@@ -29,6 +28,8 @@ description: มาตรฐานการเขียนโค้ดแบบ 
 | Card Component | 200 บรรทัด | แยก sub-component |
 | Custom Hook | 150 บรรทัด | แยก hook ย่อย |
 | **Hard Limit (ทุกไฟล์)** | **500 บรรทัด** | **ห้ามเกินเด็ดขาด** |
+
+> **ทำไม 500 บรรทัด:** เกินจุดนี้แล้วไฟล์เดียวมักถือ concern มากกว่า 1 อย่าง (data + UI + business logic ปนกัน) ทำให้ diff review ยากและเพิ่มโอกาส merge conflict — เป็นสัญญาณเตือนให้แยก ไม่ใช่กฎที่ตายตัวโดยไม่มีเหตุผล
 
 ---
 
@@ -104,217 +105,24 @@ export default FeatureContainer;
 
 ## 3. Custom Hook Pattern — Logic Separation
 
-### useFeatureData.js (Data Hook)
+แยก logic ออกจาก Container เป็น hook เฉพาะทาง — data fetching กับ filter/search ควรอยู่คนละไฟล์เสมอ เพราะ concern ต่างกันและ re-render ด้วยเหตุผลต่างกัน
 
-```javascript
-import {useState, useCallback, useEffect} from 'react';
-import {useDispatch, useSelector} from 'react-redux';
-import {fetchFeatureList} from '../../../store/actions/FeatureActions';
+- **Data hook** (fetch, pagination, load-more): ดู template `templates/useFeatureData.js`
+- **Filter/search hook** (client-side filter, search query): ดู template `templates/useFeatureFilter.js`
 
-const useFeatureData = () => {
-  const dispatch = useDispatch();
-  const {list, loading, error} = useSelector(state => state.feature);
-
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-
-  const fetchData = useCallback(
-    async (currentPage = 1) => {
-      try {
-        const result = await dispatch(fetchFeatureList({page: currentPage}));
-        if (currentPage === 1) {
-          setPage(1);
-          setHasMore(true);
-        }
-        if (result?.pageInfo) {
-          setHasMore((result.pageInfo.to ?? 0) < (result.pageInfo.total ?? 0));
-        }
-      } catch (err) {
-        console.log('[useFeatureData] fetchData error:', err);
-      }
-    },
-    [dispatch],
-  );
-
-  const loadMore = useCallback(async () => {
-    if (isLoadingMore || !hasMore) return;
-    try {
-      setIsLoadingMore(true);
-      const nextPage = page + 1;
-      await fetchData(nextPage);
-      setPage(nextPage);
-    } finally {
-      setIsLoadingMore(false);
-    }
-  }, [isLoadingMore, hasMore, page, fetchData]);
-
-  useEffect(() => {
-    fetchData(1);
-  }, [fetchData]);
-
-  return {
-    data: list,
-    loading,
-    error,
-    isLoadingMore,
-    hasMore,
-    fetchData,
-    loadMore,
-  };
-};
-
-export default useFeatureData;
-```
-
-### useFeatureFilter.js (Filter Hook)
-
-```javascript
-import {useState, useCallback, useMemo} from 'react';
-
-const FILTER_OPTIONS = ['all', 'active', 'inactive'];
-
-const useFeatureFilter = (data = []) => {
-  const [activeFilter, setActiveFilter] = useState('all');
-  const [searchQuery, setSearchQuery] = useState('');
-
-  const filteredData = useMemo(() => {
-    let result = data;
-
-    if (activeFilter !== 'all') {
-      result = result.filter(item => item.status === activeFilter);
-    }
-
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      result = result.filter(item =>
-        item.name?.toLowerCase().includes(query),
-      );
-    }
-
-    return result;
-  }, [data, activeFilter, searchQuery]);
-
-  const handleFilterChange = useCallback(filter => {
-    setActiveFilter(filter);
-  }, []);
-
-  const handleSearch = useCallback(text => {
-    setSearchQuery(text);
-  }, []);
-
-  return {
-    filteredData,
-    activeFilter,
-    searchQuery,
-    filterOptions: FILTER_OPTIONS,
-    handleFilterChange,
-    handleSearch,
-  };
-};
-
-export default useFeatureFilter;
-```
+Copy ไฟล์ใน `templates/` ไปวางในโฟลเดอร์ feature แล้ว rename `Feature`/`feature` เป็นชื่อ feature จริง
 
 ---
 
 ## 4. Section Component Pattern
 
-### ListSection.js
-
-```javascript
-import React, {useCallback} from 'react';
-import {FlatList} from 'react-native';
-import {ListEmpty, Skeleton} from '../../../components';
-import i18n from '../../../utils/i18n';
-import FeatureCard from './FeatureCard';
-import FooterSection from './FooterSection';
-
-const SKELETON_COUNT = 5;
-
-const ListSection = ({
-  data,
-  loading,
-  error,
-  onItemPress,
-  onLoadMore,
-  hasMore,
-  onRefresh,
-}) => {
-  const renderItem = useCallback(
-    ({item}) => <FeatureCard item={item} onPress={onItemPress} />,
-    [onItemPress],
-  );
-
-  const keyExtractor = useCallback(item => String(item.id), []);
-
-  const renderFooter = useCallback(
-    () => <FooterSection hasMore={hasMore} />,
-    [hasMore],
-  );
-
-  const renderEmpty = useCallback(() => {
-    if (loading) return null;
-    return <ListEmpty message={i18n.t('feature.empty')} />;
-  }, [loading]);
-
-  if (loading && (!data || data.length === 0)) {
-    return (
-      <>
-        {Array.from({length: SKELETON_COUNT}).map((_, i) => (
-          <Skeleton key={`skeleton-${i}`} type="line" height={80} />
-        ))}
-      </>
-    );
-  }
-
-  return (
-    <FlatList
-      data={data}
-      renderItem={renderItem}
-      keyExtractor={keyExtractor}
-      ListFooterComponent={renderFooter}
-      ListEmptyComponent={renderEmpty}
-      onEndReached={onLoadMore}
-      onEndReachedThreshold={0.5}
-      removeClippedSubviews
-      maxToRenderPerBatch={10}
-      windowSize={10}
-      initialNumToRender={10}
-    />
-  );
-};
-
-export default ListSection;
-```
+Section component (เช่น list ที่มี loading/empty/pagination state) มักซ้ำโครงเดิมทุกครั้ง — ใช้ template `templates/ListSection.js` เป็นจุดเริ่ม แล้ว rename `Feature`/`feature` เป็นชื่อจริง
 
 ---
 
 ## 5. Constants File Pattern
 
-```javascript
-// constants.js — ค่าคงที่ทั้งหมดของ feature นี้
-
-export const PER_PAGE = 10;
-
-export const TAB_OPTIONS = [
-  {key: 'all', labelKey: 'feature.tab_all'},
-  {key: 'active', labelKey: 'feature.tab_active'},
-  {key: 'inactive', labelKey: 'feature.tab_inactive'},
-];
-
-export const SORT_OPTIONS = [
-  {key: 'newest', labelKey: 'feature.sort_newest'},
-  {key: 'oldest', labelKey: 'feature.sort_oldest'},
-  {key: 'name', labelKey: 'feature.sort_name'},
-];
-
-// TODO: Remove when API integrated — GET /api/v1/feature/list
-export const MOCK_FEATURE_LIST = [
-  {id: '1', name: 'Item 1', status: 'active', score: 100},
-  {id: '2', name: 'Item 2', status: 'inactive', score: 80},
-];
-```
+รวมค่าคงที่ของ feature (page size, tab/sort options, mock data ระหว่างรอ API) ไว้ไฟล์เดียว แยกจาก logic — ดู template `templates/constants.js`
 
 ---
 

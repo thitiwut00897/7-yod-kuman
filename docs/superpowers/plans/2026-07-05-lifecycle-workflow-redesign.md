@@ -555,7 +555,7 @@ git commit -m "refactor(agents): rewrite tester-agent for RED/Verify roles, drop
 - Modify: `agents/senior-full-stack-agent.md` (full rewrite)
 
 **Interfaces:**
-- Consumes: `project-blueprint.md` § 2 (Tech Stack) and § 6 (Commands); skills `ui-guide-template`, `codeing-guide`, `render-html-guide`, `scroll-bottom-safe-area` (referenced conditionally, unchanged files)
+- Consumes: `project-blueprint.md` § 2 (Tech Stack) and § 6 (Commands); skills `ui-guide-template`, `codeing-guide`, `scroll-bottom-safe-area` (referenced conditionally, unchanged files)
 - Produces: agent `senior-full-stack-agent`, invoked as `@senior-full-stack-agent` by Task 11 (`build.md`), Task 12 (`verify.md` FAIL path is refactor not this agent — no, Verify FAIL routes to refactor-agent only), and Task 6/Task 8 cross-references
 
 - [ ] **Step 1: Write the validation check (will fail — old RN hardcode still present)**
@@ -613,7 +613,7 @@ model: claude-4.6-sonnet-medium
 - ทำตาม convention ที่มีอยู่แล้วในโปรเจกต์ (ดูไฟล์ใกล้เคียงก่อนเขียน)
 - รองรับ loading/error/empty state ตามที่ AC ระบุ
 - ใส่ identifier สำหรับ automated testing ตาม convention ของ stack (เช่น React Native: prop `testID`, Web: `data-testid`) — ดูรายละเอียดที่ skill `ui-guide-template` **ถ้า stack เป็น React Native**
-- ถ้า stack เป็น React Native โดยเฉพาะ ให้ดู skill เพิ่มเติมตามความเกี่ยวข้อง: `codeing-guide` (state/naming), `render-html-guide` (ถ้าใช้ react-native-render-html), `scroll-bottom-safe-area` (ถ้ามี ScrollView ท้ายจอ) — skill เหล่านี้ไม่ trigger เองถ้าไม่ใช่ RN project
+- ถ้า stack เป็น React Native โดยเฉพาะ ให้ดู skill เพิ่มเติมตามความเกี่ยวข้อง: `codeing-guide` (state/naming), `scroll-bottom-safe-area` (ถ้ามี ScrollView ท้ายจอ) — skill เหล่านี้ไม่ trigger เองถ้าไม่ใช่ RN project
 
 ## 4. Testing
 
@@ -622,7 +622,7 @@ model: claude-4.6-sonnet-medium
 
 ## 5. Visual Check (ปิด task)
 
-เมื่อ implement ทั้ง backend+frontend ของ task เสร็จและ test เขียวแล้ว — ถ้า task มี UI ให้ user เช็ค UI จริงก่อนปิด task (ดู skill `visual-markers` ถ้าต้องการใช้ debug border + screenshot workflow)
+เมื่อ implement ทั้ง backend+frontend ของ task เสร็จและ test เขียวแล้ว — ถ้า task มี UI ให้ auto-check ด้วย `webapp-testing` (web) / `ios-simulator-skill` (iOS) หรือ user เช็ค UI จริงเองก่อนปิด task ถ้าไม่มีเครื่องมือ automate
 
 ## Checklist ก่อนส่งงานกลับ
 
@@ -639,8 +639,8 @@ model: claude-4.6-sonnet-medium
 | แหล่งข้อมูล | อ่านเมื่อ |
 |---|---|
 | `docs/codebase-docs/project-blueprint.md` | ทุก task — stack, structure, commands |
-| skill `ui-guide-template`, `codeing-guide`, `render-html-guide`, `scroll-bottom-safe-area` | เฉพาะเมื่อ stack เป็น React Native |
-| skill `visual-markers` | ตอนเช็ค UI ปิด task |
+| skill `ui-guide-template`, `codeing-guide`, `scroll-bottom-safe-area` | เฉพาะเมื่อ stack เป็น React Native |
+| skill `webapp-testing`, `ios-simulator-skill` | ตอนเช็ค UI ปิด task |
 ```
 
 - [ ] **Step 4: Run validation again to confirm it passes**
